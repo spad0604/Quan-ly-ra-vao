@@ -1,12 +1,17 @@
 import 'package:quanly/data/models/indentity_card_model.dart';
 
-extension IndentityParseExtension on String? {
-  IndentityCardModel toIndentityCardModel(String rawData) {
-    // The QR format uses pipe delimiters. Example:
-    // id||Full Name|Sex|Address|CreatedAt
-    // Splitting on '|' yields empty strings for double-pipe positions, so
-    // we map the expected positions accordingly.
-    final parts = rawData.split('|');
+extension IndentityParseExtension on String {
+  IndentityCardModel toIndentityCardModel() {
+    // CCCD QR commonly uses pipe delimiters.
+    // Seen formats:
+    // - id|fullName|dob(ddMMyyyy)|sex|address
+    // - id|fullName|dob|sex|address|issueDate(ddMMyyyy)
+    // - id||fullName|dob|sex|address|issueDate  (empty field after id)
+    var parts = split('|');
+    if (parts.length >= 2 && parts[1].trim().isEmpty) {
+      // Drop the empty placeholder after id to normalize ordering.
+      parts = <String>[parts[0], ...parts.skip(2)];
+    }
 
     // Defensive defaults
     String indentityNumber = '';
@@ -15,17 +20,14 @@ extension IndentityParseExtension on String? {
     String address = '';
     String createAt = '';
 
-    if (parts.isNotEmpty) {
-      // parts[0] => id
-      indentityNumber = parts[0].trim();
-    }
+    if (parts.isNotEmpty) indentityNumber = parts[0].trim();
 
-    // For the sample format there is an empty part[1] (because of '||'),
-    // then name at parts[2], sex at parts[3], address at parts[4], createAt at parts[5]
-    if (parts.length > 2) fullName = parts[2].trim();
+    // Prefer the common CCCD ordering: id|name|dob|sex|address(|issueDate)
+    if (parts.length > 1) fullName = parts[1].trim();
+    if (parts.length > 2) createAt = parts[2].trim(); // DOB
     if (parts.length > 3) sex = parts[3].trim();
     if (parts.length > 4) address = parts[4].trim();
-    if (parts.length > 5) createAt = parts[5].trim();
+    // parts[5] (issueDate) is currently unused in IndentityCardModel.
 
     return IndentityCardModel(
       indentityNumber: indentityNumber,

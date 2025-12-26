@@ -90,4 +90,9 @@ const Map<String, String> viVN = {
   'validation_max_length': 'Tối đa {max} ký tự',
   'validation_numeric': 'Chỉ được nhập số',
   'validation_phone': 'Số điện thoại không hợp lệ',
+
+  'overview': 'Tổng quan',
+  'personal_management': 'Quản lý cán bộ',
+  'anoymus_qr_reader': 'Quét QR khách vãng lai',
+  'history': 'Lịch sử ra vào',
 };

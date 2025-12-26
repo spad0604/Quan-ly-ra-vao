@@ -17,4 +17,11 @@ class AppColors {
   
   static const Color divider = Color(0xFFE0E0E0);
   static const Color border = Color(0xFFBDBDBD);
+
+  static const Color blueDark = Color(0xFF1773CF);
+  
+  // ignore: deprecated_member_use
+  static  Color blueLight = blueDark.withOpacity(0.1);
+
+  static const Color blueGray = Color(0xFF637588);
 }

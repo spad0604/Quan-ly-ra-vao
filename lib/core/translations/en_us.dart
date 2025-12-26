@@ -90,4 +90,9 @@ const Map<String, String> enUS = {
   'validation_max_length': 'Maximum {max} characters',
   'validation_numeric': 'Numbers only',
   'validation_phone': 'Invalid phone number',
+
+  'overview': 'Overview',
+  'personal_management': 'Personnel Management',
+  'anoymus_qr_reader': 'Anonymous QR Reader',
+  'history': 'Entry/Exit History',
 };
