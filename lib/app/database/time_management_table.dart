@@ -19,6 +19,30 @@ class TimeManagementTable extends Table{
   Set<Column> get primaryKey => {id};
 }
 
+enum Status {
+  entry,
+  exit;
+  String get value {
+    switch (this) {
+      case Status.entry:
+        return 'ENTRY';
+      case Status.exit:
+        return 'EXIT';
+    }
+  }
+
+  static Status fromString(String status) {
+    switch (status) {
+      case 'ENTRY':
+        return Status.entry;
+      case 'EXIT':
+        return Status.exit;
+      default:
+        return Status.entry;
+    }
+  }
+}
+
 enum Role {
   member,
   admin, 

@@ -1847,7 +1847,7 @@ class $AnonymusTableTable extends AnonymusTable
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
       minTextLength: 5,
-      maxTextLength: 20,
+      maxTextLength: 255,
     ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,

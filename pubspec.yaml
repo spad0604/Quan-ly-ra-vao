@@ -50,6 +50,8 @@ dependencies:
   flutter_libserialport: ^0.6.0
   excel: ^4.0.6
   intl: ^0.20.2
+  qr_flutter: ^4.1.0
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +78,13 @@ flutter:
   uses-material-design: true
   assets:
     - assets/env
+    - assets/images/
+
+flutter_launcher_icons:
+  image_path: "assets/images/app_icon.png"
+  windows:
+    generate: true
+    icon_size: 256
 
   # To add assets to your application, add an assets section, like this:
   # assets:

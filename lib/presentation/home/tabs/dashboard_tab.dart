@@ -20,20 +20,14 @@ class DashboardTab extends GetView<DashboardController> {
                 _buildStatsGrid(),
                 const SizedBox(height: 24),
                 // Main Content Area: Chart + Right Panel
-                // Use IntrinsicHeight to make them match height if desired, 
+                // Use IntrinsicHeight to make them match height if desired,
                 // but usually chart has fixed height.
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 3, 
-                      child: _buildChartSection(),
-                    ),
+                    Expanded(flex: 3, child: _buildChartSection()),
                     const SizedBox(width: 24),
-                    Expanded(
-                      flex: 1, 
-                      child: _buildRightPanel(),
-                    ),
+                    Expanded(flex: 1, child: _buildRightPanel()),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -47,53 +41,45 @@ class DashboardTab extends GetView<DashboardController> {
   }
 
   Widget _buildStatsGrid() {
-    return Obx(() => IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: StatCard(
-              title: 'dashboard_total_staff'.tr,
-              value: '${controller.totalStaff}',
-              icon: Icons.people_outline,
-              iconColor: Colors.blue,
-              trendText: '↗ +${controller.newStaff} ${'dashboard_new_staff'.tr}',
-              trendColor: Colors.green,
+    return Obx(
+      () => IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: StatCard(
+                title: 'dashboard_total_staff'.tr,
+                value: '${controller.totalStaff}',
+                icon: Icons.people_outline,
+                iconColor: Colors.blue,
+                trendText:
+                    '↗ +${controller.newStaff} ${'dashboard_new_staff'.tr}',
+                trendColor: Colors.green,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: StatCard(
-              title: 'dashboard_guests_today'.tr,
-              value: '${controller.guestsToday}',
-              subtext: 'dashboard_checked_in'.tr,
-              icon: Icons.badge_outlined,
-              iconColor: Colors.orange,
+            const SizedBox(width: 16),
+            Expanded(
+              child: StatCard(
+                title: 'dashboard_guests_today'.tr,
+                value: '${controller.guestsToday}',
+                subtext: 'dashboard_checked_in'.tr,
+                icon: Icons.badge_outlined,
+                iconColor: Colors.orange,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: StatCard(
-              title: 'dashboard_in_building'.tr,
-              value: '${controller.inBuilding}',
-              icon: Icons.apartment,
-              iconColor: Colors.green,
+            const SizedBox(width: 16),
+            Expanded(
+              child: StatCard(
+                title: 'dashboard_in_building'.tr,
+                value: '${controller.inBuilding}',
+                icon: Icons.apartment,
+                iconColor: Colors.green,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: StatCard(
-              title: 'dashboard_pending_requests'.tr,
-              value: '${controller.pendingRequests}',
-              trendText: 'dashboard_view_details'.tr,
-              trendColor: Colors.blue,
-              icon: Icons.warning_amber_rounded,
-              iconColor: Colors.red,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildChartSection() {
@@ -140,49 +126,80 @@ class DashboardTab extends GetView<DashboardController> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text('${'dashboard_this_week'.tr} ▾', style: const TextStyle(fontSize: 12)),
+                child: Text(
+                  '${'dashboard_this_week'.tr} ▾',
+                  style: const TextStyle(fontSize: 12),
+                ),
               ),
             ],
           ),
           const SizedBox(height: 24),
-          Obx(() => Wrap(
-            crossAxisAlignment: WrapCrossAlignment.end,
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              Text(
-                '${controller.totalTraffic}',
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
+          Obx(
+            () => Wrap(
+              crossAxisAlignment: WrapCrossAlignment.end,
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                Text(
+                  '${controller.totalTraffic}',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                child: Text(
-                  '+${controller.trafficGrowth}%',
-                  style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '+${controller.trafficGrowth}%',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text('dashboard_vs_last_week'.tr, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-              ),
-            ],
-          )),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    'dashboard_vs_last_week'.tr,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 24),
           SizedBox(
             height: 300,
             width: double.infinity,
-            child: CustomPaint(
-              painter: _ChartPlaceholderPainter(),
-            ),
+            child: Obx(() {
+              if (controller.trafficData.isEmpty) {
+                return Center(
+                  child: Text(
+                    'Chưa có dữ liệu',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                );
+              }
+              return CustomPaint(
+                painter: _TrafficChartPainter(controller.trafficData),
+              );
+            }),
           ),
         ],
       ),
@@ -213,12 +230,19 @@ class DashboardTab extends GetView<DashboardController> {
               const SizedBox(height: 16),
               Text(
                 'dashboard_quick_qr_scan'.tr,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 6),
               Text(
                 'dashboard_qr_description'.tr,
-                style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 12,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -226,15 +250,25 @@ class DashboardTab extends GetView<DashboardController> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.find<HomeController>().selectedIndex.value = 2;
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF1E88E5),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
-                  child: Text('dashboard_do_now'.tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  child: Text(
+                    'dashboard_do_now'.tr,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -248,41 +282,76 @@ class DashboardTab extends GetView<DashboardController> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('dashboard_recent_activity'.tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  Text('dashboard_view_all'.tr, style: TextStyle(color: Colors.blue.shade700, fontSize: 11)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ...List.generate(4, (index) {
-                final items = [
-                  ('Trần Thị B', 'Khách vãng lai • P. Hành chính', 'VÀO', '08:30', Colors.green),
-                  ('Lê Văn C', 'Cán bộ • Ban Tuyên giáo', 'VÀO', '08:15', Colors.green),
-                  ('Phạm Văn D', 'Khách vãng lai • P. Tài vụ', 'RA', '08:10', Colors.orange),
-                  ('Nguyễn Thị E', 'Cán bộ • P. Kế toán', 'VÀO', '08:00', Colors.green),
-                ];
-                return _buildActivityItem(
-                  items[index].$1,
-                  items[index].$2,
-                  items[index].$3,
-                  items[index].$4,
-                  items[index].$5,
-                );
-              }),
-            ],
+          child: Obx(
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'dashboard_recent_activity'.tr,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () {
+                          Get.find<HomeController>().selectedIndex.value = 3;
+                        },
+                        child: Text(
+                          'dashboard_view_all'.tr,
+                          style: TextStyle(
+                            color: Colors.blue.shade700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (controller.recentEntriesWithNames.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Text(
+                        'no_data'.tr,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                    ),
+                  )
+                else
+                  ...controller.recentEntriesWithNames.map((item) {
+                    final entry = item['entry'] as TimeManagementTableData;
+                    final name = item['name'] as String;
+                    final timeFormat = DateFormat('HH:mm');
+                    final checkInTimeStr = timeFormat.format(entry.checkInTime);
+                    return _buildActivityItem(
+                      name,
+                      checkInTimeStr,
+                      entry.status == 'ENTRY' ? 'ENTRY' : 'EXIT',
+                      entry.status == 'ENTRY' ? Colors.green : Colors.red,
+                    );
+                  }).toList(),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildActivityItem(String name, String detail, String status, String time, Color color) {
+  Widget _buildActivityItem(
+    String name,
+    String time,
+    String status,
+    Color color,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -293,12 +362,12 @@ class DashboardTab extends GetView<DashboardController> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                Text(detail, style: const TextStyle(color: Colors.grey, fontSize: 11)),
-              ],
+            child: Text(
+              name,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
             ),
           ),
           Column(
@@ -312,11 +381,18 @@ class DashboardTab extends GetView<DashboardController> {
                 ),
                 child: Text(
                   status,
-                  style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 10),
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
-              Text(time, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+              Text(
+                time,
+                style: const TextStyle(color: Colors.grey, fontSize: 11),
+              ),
             ],
           ),
         ],
@@ -339,59 +415,148 @@ class DashboardTab extends GetView<DashboardController> {
             children: [
               Text(
                 'dashboard_staff_present_today'.tr,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               Row(
                 children: [
                   OutlinedButton.icon(
                     onPressed: () {},
-                    icon: const Icon(Icons.filter_list, size: 16),
-                    label: Text('filter'.tr),
+                    icon: const Icon(Icons.filter_list, size: 16, color: AppColors.blueDark),
+                    label: Text('filter'.tr, style: TextStyle(color: AppColors.blueDark),),
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.blueDark,
+                      foregroundColor: Colors.white,
+                    ),
                     onPressed: () {},
-                    icon: const Icon(Icons.download, size: 16),
-                    label: Text('dashboard_export_report'.tr),
+                    icon: const Icon(Icons.download, size: 16, color: Colors.white),
+                    label: Text('dashboard_export_report'.tr, style: TextStyle(fontSize: 12, color: Colors.white)),
                   ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 16),
-          Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: const {
-              0: FlexColumnWidth(2),
-              1: FlexColumnWidth(1.5),
-              2: FlexColumnWidth(1),
-              3: FlexColumnWidth(1),
-              4: FixedColumnWidth(50),
-            },
-            children: [
-              TableRow(
-                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey.shade200))),
-                children: [
-                  Padding(padding: const EdgeInsets.all(12), child: Text('dashboard_full_name'.tr, style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold))),
-                  Text('dashboard_department'.tr, style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
-                  Text('dashboard_time_in'.tr, style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
-                  Text('dashboard_status'.tr, style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
-                  Text('dashboard_action'.tr, style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              _buildTableRow('Hoàng Văn Thái', 'Phòng CNTT', '07:45', 'dashboard_working'.tr, Colors.green),
-              _buildTableRow('Nguyễn Thị Mai', 'Văn phòng Sở', '07:55', 'dashboard_working'.tr, Colors.green),
-              _buildTableRow('Trần Văn Vĩnh', 'Phòng Kế toán', '--:--', 'dashboard_absent'.tr, Colors.grey),
-            ],
-          ),
+          Obx(() {
+            if (controller.todayStaffPresent.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.all(32),
+                child: Center(
+                  child: Text(
+                    'Không có dữ liệu',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ),
+              );
+            }
+
+            return Table(
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              columnWidths: const {
+                0: FlexColumnWidth(2),
+                1: FlexColumnWidth(1.5),
+                2: FlexColumnWidth(1),
+                3: FlexColumnWidth(1),
+                4: FixedColumnWidth(50),
+              },
+              children: [
+                TableRow(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey.shade200),
+                    ),
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        'dashboard_full_name'.tr,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'dashboard_department'.tr,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'dashboard_time_in'.tr,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'dashboard_status'.tr,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'dashboard_action'.tr,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                ...controller.todayStaffPresent.map((staff) {
+                  final timeStr = staff.checkInTime != null
+                      ? '${staff.checkInTime!.hour.toString().padLeft(2, '0')}:${staff.checkInTime!.minute.toString().padLeft(2, '0')}'
+                      : '--:--';
+                  final statusText = staff.isPresent
+                      ? 'dashboard_working'.tr
+                      : 'dashboard_absent'.tr;
+                  final statusColor = staff.isPresent
+                      ? Colors.green
+                      : Colors.grey;
+
+                  return _buildTableRow(
+                    staff.name,
+                    staff.department.isEmpty
+                        ? 'Chưa có phòng ban'
+                        : staff.department,
+                    timeStr,
+                    statusText,
+                    statusColor,
+                  );
+                }).toList(),
+              ],
+            );
+          }),
         ],
       ),
     );
   }
 
-  TableRow _buildTableRow(String name, String dept, String time, String status, Color color) {
+  TableRow _buildTableRow(
+    String name,
+    String dept,
+    String time,
+    String status,
+    Color color,
+  ) {
     return TableRow(
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey.shade100))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+      ),
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -400,7 +565,10 @@ class DashboardTab extends GetView<DashboardController> {
               CircleAvatar(
                 radius: 14,
                 backgroundColor: color.withOpacity(0.1),
-                child: Text(name.substring(0, 1), style: TextStyle(color: color, fontSize: 12)),
+                child: Text(
+                  name.substring(0, 1),
+                  style: TextStyle(color: color, fontSize: 12),
+                ),
               ),
               const SizedBox(width: 8),
               Text(name, style: const TextStyle(fontWeight: FontWeight.w500)),
@@ -413,7 +581,10 @@ class DashboardTab extends GetView<DashboardController> {
           alignment: Alignment.centerLeft,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -430,37 +601,126 @@ class DashboardTab extends GetView<DashboardController> {
   }
 }
 
-class _ChartPlaceholderPainter extends CustomPainter {
+class _TrafficChartPainter extends CustomPainter {
+  final List<Map<String, dynamic>> data;
+  
+  _TrafficChartPainter(this.data);
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.blue
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
+    if (data.isEmpty) {
+      // Empty state is handled by parent widget
+      return;
+    }
 
-    final path = Path();
-    path.moveTo(0, size.height * 0.8);
-    path.quadraticBezierTo(size.width * 0.2, size.height * 0.9, size.width * 0.4, size.height * 0.4);
-    path.quadraticBezierTo(size.width * 0.6, 0, size.width * 0.8, size.height * 0.6);
-    path.lineTo(size.width, size.height * 0.5);
-
-    canvas.drawPath(path, paint);
+    // Extract counts from data
+    final counts = data.map((d) => d['count'] as int).toList();
     
-    // Draw shading
+    // Find max count for scaling (add some padding at top)
+    final maxCount = counts.isEmpty ? 0 : counts.reduce((a, b) => a > b ? a : b);
+    final maxValue = maxCount > 0 ? maxCount * 1.2 : 10; // 20% padding
+
+    // Convert data points to chart coordinates
+    final points = <Offset>[];
+    for (int i = 0; i < data.length; i++) {
+      final x = (size.width / (data.length - 1)) * i;
+      final count = counts[i];
+      // Invert Y: 0 count = bottom, max count = top
+      final y = size.height - (count / maxValue) * size.height;
+      points.add(Offset(x, y));
+    }
+
+    // Create smooth path using cubic bezier curves
+    final path = Path();
+    if (points.isEmpty) return;
+    
+    path.moveTo(points[0].dx, points[0].dy);
+    
+    // Draw smooth curves between points
+    for (int i = 1; i < points.length; i++) {
+      if (i == 1) {
+        // First curve: use quadratic for smooth start
+        final controlPoint = Offset(
+          (points[i - 1].dx + points[i].dx) / 2,
+          (points[i - 1].dy + points[i].dy) / 2,
+        );
+        path.quadraticBezierTo(
+          controlPoint.dx,
+          controlPoint.dy,
+          points[i].dx,
+          points[i].dy,
+        );
+      } else {
+        // Use cubic bezier for smoother curves
+        final prevPoint = points[i - 1];
+        final currentPoint = points[i];
+        final nextPoint = i < points.length - 1 ? points[i + 1] : currentPoint;
+        
+        // Control points for smooth curve
+        final cp1 = Offset(
+          prevPoint.dx + (currentPoint.dx - prevPoint.dx) * 0.5,
+          prevPoint.dy,
+        );
+        final cp2 = Offset(
+          currentPoint.dx - (nextPoint.dx - currentPoint.dx) * 0.5,
+          currentPoint.dy,
+        );
+        
+        path.cubicTo(
+          cp1.dx,
+          cp1.dy,
+          cp2.dx,
+          cp2.dy,
+          currentPoint.dx,
+          currentPoint.dy,
+        );
+      }
+    }
+
+    // Draw filled area first (so line appears on top)
+    final fillPath = Path()
+      ..addPath(path, Offset.zero)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+
     final fillPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = LinearGradient(
-        colors: [Colors.blue.withOpacity(0.2), Colors.blue.withOpacity(0)],
+        colors: [
+          const Color(0xFF2196F3).withOpacity(0.25),
+          const Color(0xFF2196F3).withOpacity(0.05),
+          const Color(0xFF2196F3).withOpacity(0.0),
+        ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
+        stops: const [0.0, 0.5, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-      
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
-    canvas.drawPath(path, fillPaint);
+
+    canvas.drawPath(fillPath, fillPaint);
+
+    // Draw the line on top
+    final linePaint = Paint()
+      ..color = const Color(0xFF2196F3)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    canvas.drawPath(path, linePaint);
+
+    // Draw data points
+    final pointPaint = Paint()
+      ..color = const Color(0xFF2196F3)
+      ..style = PaintingStyle.fill;
+
+    for (final point in points) {
+      canvas.drawCircle(point, 4, pointPaint);
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _TrafficChartPainter oldDelegate) {
+    return oldDelegate.data != data;
+  }
 }

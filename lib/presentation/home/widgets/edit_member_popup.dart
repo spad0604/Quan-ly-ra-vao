@@ -1,23 +1,72 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quanly/app/database/app_database.dart';
+import 'package:quanly/core/authentication/authentication_service.dart';
 import 'package:quanly/core/values/app_colors.dart';
-import 'package:quanly/presentation/personal/personal_controller.dart';
+import 'package:quanly/presentation/home/controllers/staff_controller.dart';
+import 'package:quanly/presentation/personal/widget/add_personal_popup.dart';
 
-part 'scan_cccd_section.dart';
-part 'personal_form_field.dart';
-part 'personal_image_picker.dart';
+class EditMemberPopup extends StatefulWidget {
+  final MemberTableData member;
 
-class AddPersonalPopup extends StatefulWidget {
-  const AddPersonalPopup({super.key});
+  const EditMemberPopup({super.key, required this.member});
 
   @override
-  State<AddPersonalPopup> createState() => _AddPersonalPopupState();
+  State<EditMemberPopup> createState() => _EditMemberPopupState();
 }
 
-class _AddPersonalPopupState extends State<AddPersonalPopup> {
-  final personalController = Get.find<PersonalController>();
+class _EditMemberPopupState extends State<EditMemberPopup> {
+  final staffController = Get.find<StaffController>();
+  final authenticationService = AuthenticationService();
+
+  final nameController = TextEditingController();
+  final idController = TextEditingController();
+  final addressController = TextEditingController();
+  final dateOfBirthController = TextEditingController();
+  final positionController = TextEditingController();
+  final phoneNumberController = TextEditingController();
+
+  String selectedDepartmentId = '';
+  String selectedSex = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMemberData();
+  }
+
+  Future<void> _loadMemberData() async {
+    // Get original member data from database (with original departmentId)
+    final originalMember = await AppDatabase.instance.getMemberById(widget.member.id);
+    if (originalMember != null) {
+      nameController.text = originalMember.name;
+      // Decode identity number for display
+      try {
+        idController.text = authenticationService.decodeIndentityNumber(originalMember.identityNumber);
+      } catch (e) {
+        idController.text = '';
+      }
+      addressController.text = originalMember.address;
+      dateOfBirthController.text = originalMember.dateOfBirth;
+      positionController.text = originalMember.position;
+      phoneNumberController.text = originalMember.phoneNumber;
+      selectedDepartmentId = originalMember.departmentId;
+      selectedSex = originalMember.sex;
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    idController.dispose();
+    addressController.dispose();
+    dateOfBirthController.dispose();
+    positionController.dispose();
+    phoneNumberController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -36,7 +85,7 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Thêm Cán bộ mới',
+                    'Chỉnh sửa Cán bộ',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
@@ -57,35 +106,10 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Scan Section
-                    const ScanCccdSection(),
-
-                    const SizedBox(height: 24),
-
-                    // Divider "Hoặc nhập thủ công"
-                    Row(
-                      children: [
-                        Expanded(child: Divider(color: Colors.grey.shade300)),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'Hoặc nhập thủ công',
-                            style: TextStyle(
-                              color: Colors.grey.shade500,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                        Expanded(child: Divider(color: Colors.grey.shade300)),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
                     // CCCD Info Section
                     _buildSectionHeader(
                       Icons.auto_awesome,
-                      'THÔNG TIN TỪ CCCD',
+                      'THÔNG TIN CÁ NHÂN',
                     ),
                     const SizedBox(height: 16),
 
@@ -94,14 +118,14 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                         Expanded(
                           child: PersonalTextField(
                             label: 'Số CCCD / Định danh',
-                            controller: personalController.idController,
+                            controller: idController,
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
                           child: PersonalTextField(
                             label: 'Họ và tên',
-                            controller: personalController.nameController,
+                            controller: nameController,
                           ),
                         ),
                       ],
@@ -113,23 +137,22 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                         Expanded(
                           child: PersonalDatePicker(
                             label: 'Ngày sinh',
-                            controller:
-                                personalController.dateOfBirthController,
+                            controller: dateOfBirthController,
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
-                          child: Obx(
-                            () => PersonalDropdown(
-                              label: 'Giới tính',
-                              value: personalController.sex.value.isEmpty
-                                  ? null
-                                  : personalController.sex.value,
-                              items: ['Nam', 'Nữ', 'Khác'],
-                              onChanged: (v) {
-                                if (v != null) personalController.sex.value = v;
-                              },
-                            ),
+                          child: PersonalDropdown(
+                            label: 'Giới tính',
+                            value: selectedSex.isEmpty ? null : selectedSex,
+                            items: ['Nam', 'Nữ', 'Khác'],
+                            onChanged: (v) {
+                              if (v != null) {
+                                setState(() {
+                                  selectedSex = v;
+                                });
+                              }
+                            },
                           ),
                         ),
                       ],
@@ -138,7 +161,7 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
 
                     PersonalTextField(
                       label: 'Quê quán',
-                      controller: personalController.addressController,
+                      controller: addressController,
                     ),
 
                     const SizedBox(height: 24),
@@ -159,21 +182,13 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                           Expanded(
                             child: PersonalDropdown(
                               label: 'Phòng ban',
-                              value:
-                                  personalController.departments.isNotEmpty &&
-                                      personalController
-                                          .departmentId
-                                          .value
-                                          .isNotEmpty
+                              value: staffController.departments.isNotEmpty &&
+                                      selectedDepartmentId.isNotEmpty
                                   ? () {
                                       try {
-                                        return personalController.departments
+                                        return staffController.departments
                                             .firstWhere(
-                                              (e) =>
-                                                  e.id ==
-                                                  personalController
-                                                      .departmentId
-                                                      .value,
+                                              (e) => e.id == selectedDepartmentId,
                                             )
                                             .name;
                                       } catch (e) {
@@ -181,17 +196,17 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                                       }
                                     }()
                                   : null,
-                              items: personalController.departments
+                              items: staffController.departments
                                   .map((e) => e.name)
                                   .toList(),
                               onChanged: (v) {
                                 if (v != null) {
                                   try {
-                                    final department = personalController
-                                        .departments
+                                    final department = staffController.departments
                                         .firstWhere((e) => e.name == v);
-                                    personalController.departmentId.value =
-                                        department.id;
+                                    setState(() {
+                                      selectedDepartmentId = department.id;
+                                    });
                                   } catch (e) {
                                     // Department not found, ignore
                                   }
@@ -202,7 +217,7 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: PersonalTextField(
-                              controller: personalController.positionController,
+                              controller: positionController,
                               label: 'Chức vụ',
                               hintText: 'Ví dụ: Chuyên viên',
                             ),
@@ -215,11 +230,8 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
 
                     PersonalTextField(
                       label: 'Số điện thoại',
-                      controller: personalController.phoneNumberController,
+                      controller: phoneNumberController,
                     ),
-                    const SizedBox(height: 24),
-                    // Photo Section
-                    const PersonalImagePicker(),
                   ],
                 ),
               ),
@@ -234,7 +246,7 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   OutlinedButton(
-                    onPressed: () { Get.back(); },
+                    onPressed: () => Get.back(),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
@@ -253,7 +265,17 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                   const SizedBox(width: 12),
                   ElevatedButton(
                     onPressed: () {
-                      personalController.addPersonal();
+                      staffController.updateMember(
+                        widget.member.id,
+                        nameController.text.trim(),
+                        idController.text.trim(),
+                        addressController.text.trim(),
+                        dateOfBirthController.text.trim(),
+                        positionController.text.trim(),
+                        phoneNumberController.text.trim(),
+                        selectedDepartmentId,
+                        selectedSex,
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.blueDark,
@@ -266,7 +288,7 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                       ),
                     ),
                     child: const Text(
-                      'Lưu thông tin',
+                      'Lưu thay đổi',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -299,3 +321,4 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
     );
   }
 }
+

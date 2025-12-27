@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:quanly/app/database/app_database.dart';
@@ -32,11 +33,14 @@ class HistoryController extends GetxController {
   // Filters
   final selectedFilter = 0.obs; // 0: Staff, 1: Guest
   final searchController = TextEditingController();
-  final selectedDate = '15/10/2023'.obs; // Mock date for now, should be real date picker
+  final selectedDate = DateTime.now().obs;
+  final selectedStatus = 0.obs; // 0: All, 1: In building, 2: Left
   
   // Data
   final historyList = <HistoryItem>[].obs;
   final isLoading = false.obs;
+  
+  Timer? _debounceTimer;
 
   final _db = AppDatabase.instance;
 
@@ -44,16 +48,46 @@ class HistoryController extends GetxController {
   void onInit() {
     super.onInit();
     // Default to today
-    selectedDate.value = DateFormat('dd/MM/yyyy').format(DateTime.now());
+    selectedDate.value = DateTime.now();
     fetchHistory();
     
     // Debounce search
     searchController.addListener(() {
-      // Simple debounce logic could be added here
-      if (searchController.text.isEmpty) {
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(const Duration(milliseconds: 500), () {
         fetchHistory();
-      }
+      });
     });
+  }
+  
+  @override
+  void onClose() {
+    _debounceTimer?.cancel();
+    searchController.dispose();
+    super.onClose();
+  }
+  
+  String get formattedDate => DateFormat('dd/MM/yyyy').format(selectedDate.value);
+  
+  void selectDate(DateTime date) {
+    selectedDate.value = date;
+    fetchHistory();
+  }
+  
+  void selectStatus(int status) {
+    selectedStatus.value = status;
+    fetchHistory();
+  }
+  
+  String get statusText {
+    switch (selectedStatus.value) {
+      case 1:
+        return 'history_in_building'.tr;
+      case 2:
+        return 'history_left'.tr;
+      default:
+        return 'history_all_status'.tr;
+    }
   }
 
   void changeFilter(int index) {
@@ -72,15 +106,19 @@ class HistoryController extends GetxController {
       // Note: role is stored as string in DB based on our previous insert logic
       final roleFilter = isStaff ? 'member' : 'anonymus';
       
-      // Simple join query logic
-      // Since drift's join syntax can be verbose, we'll do manual fetch & merge for simplicity 
-      // or use simple joins if possible.
-      // Let's query TimeManagement first.
+      // Build date filter - filter by date only (ignore time)
+      final selectedDateValue = selectedDate.value;
       
-      final timeLogs = await (_db.select(_db.timeManagementTable)
-        ..where((tbl) => tbl.role.equals(roleFilter))
-        ..orderBy([(t) => drift.OrderingTerm(expression: t.checkInTime, mode: drift.OrderingMode.desc)]))
-        .get();
+      var query = _db.select(_db.timeManagementTable)
+        ..where((tbl) => 
+          tbl.role.equals(roleFilter) &
+          tbl.checkInTime.year.equals(selectedDateValue.year) &
+          tbl.checkInTime.month.equals(selectedDateValue.month) &
+          tbl.checkInTime.day.equals(selectedDateValue.day)
+        )
+        ..orderBy([(t) => drift.OrderingTerm(expression: t.checkInTime, mode: drift.OrderingMode.desc)]);
+      
+      final timeLogs = await query.get();
 
       for (var log in timeLogs) {
         String name = 'Unknown';
@@ -108,21 +146,31 @@ class HistoryController extends GetxController {
           }
         }
 
+        // Determine Status & Color
+        String statusText = 'history_in_building'.tr;
+        Color statusColor = Colors.green;
+        bool hasLeft = false;
+        
+        if (log.checkOutTime != null) {
+          statusText = 'history_left'.tr;
+          statusColor = Colors.grey;
+          hasLeft = true;
+        }
+        
+        // Apply status filter
+        if (selectedStatus.value == 1 && hasLeft) {
+          continue; // Skip if filtering for "In building" but has left
+        }
+        if (selectedStatus.value == 2 && !hasLeft) {
+          continue; // Skip if filtering for "Left" but still in building
+        }
+        
         // Apply search filter in memory (for simplicity)
         if (searchController.text.isNotEmpty) {
           final query = searchController.text.toLowerCase();
           if (!name.toLowerCase().contains(query) && !code.toLowerCase().contains(query)) {
             continue;
           }
-        }
-
-        // Determine Status & Color
-        String statusText = 'Đang ở trong';
-        Color statusColor = Colors.green;
-        
-        if (log.checkOutTime != null) {
-          statusText = 'Đã ra về';
-          statusColor = Colors.grey;
         }
 
         historyList.add(HistoryItem(

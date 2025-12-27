@@ -7,7 +7,9 @@ import 'routes/app_pages.dart';
 import 'routes/app_routes.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  final Locale? initialLocale;
+
+  const App({super.key, this.initialLocale});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,7 @@ class App extends StatelessWidget {
       
       // Translations
       translations: AppTranslations(),
-      locale: Get.deviceLocale,
+      locale: initialLocale ?? Get.deviceLocale,
       fallbackLocale: const Locale('vi', 'VN'),
       
       // Theme

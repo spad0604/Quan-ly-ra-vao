@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:quanly/core/values/app_colors.dart';
+import 'package:quanly/core/services/locale_service.dart';
 
 class HomeHeader extends StatelessWidget {
   final String title;
@@ -47,17 +49,55 @@ class HomeHeader extends StatelessWidget {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const TextField(
+              child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Tìm kiếm cán bộ, khách...',
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  hintText: 'header_search_placeholder'.tr,
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 24),
+          PopupMenuButton<Locale>(
+            tooltip: 'language'.tr,
+            onSelected: (locale) async {
+              await LocaleService.setLocale(locale);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: const Locale('vi', 'VN'),
+                child: Text('language_vi'.tr),
+              ),
+              PopupMenuItem(
+                value: const Locale('en', 'US'),
+                child: Text('language_en'.tr),
+              ),
+            ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.language, size: 18, color: AppColors.blueDark),
+                  const SizedBox(width: 8),
+                  Text(
+                    Get.locale?.languageCode == 'en' ? 'EN' : 'VI',
+                    style: const TextStyle(
+                      color: AppColors.blueDark,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.notifications_none),

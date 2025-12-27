@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app/app.dart';
+import 'core/services/locale_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +12,7 @@ Future<void> main() async {
   // debug console while developing. In release builds these asserts are
   // not present, so prefer testing in release for final verification.
   PlatformDispatcher.instance.onError = (error, stack) {
-    final msg = error?.toString() ?? '';
+    final msg = error.toString();
     if (msg.contains('Attempted to send a key down event when no keys are in keysPressed') ||
         msg.contains('Unable to parse JSON message')) {
       return true; // handled - suppress HID-related errors
@@ -27,5 +28,6 @@ Future<void> main() async {
     FlutterError.presentError(details);
   };
   await dotenv.load(fileName: 'assets/env');
-  runApp(const App());
+  final savedLocale = await LocaleService.getSavedLocale();
+  runApp(App(initialLocale: savedLocale));
 }

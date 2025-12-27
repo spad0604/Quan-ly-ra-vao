@@ -26,8 +26,8 @@ class HomeBinding extends Bindings {
     
     // Inject Controller
     Get.lazyPut(() => HomeController());
-    // Inject QrReader controller for HID
-    Get.lazyPut(() => QrReaderController());
+    // Inject QrReader controller for HID (fenix: true để không bị dispose)
+    Get.lazyPut(() => QrReaderController(), fenix: true);
     // Inject PersonalController
     Get.lazyPut(() => PersonalController());
 

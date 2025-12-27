@@ -1,11 +1,9 @@
-import 'dart:ui';
-
 import 'package:get/get.dart';
 
 import '../../core/base/base_controller.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/usecases/get_users_usecase.dart';
-import '../../domain/usecases/usecase.dart';
+import 'controllers/dashboard_controller.dart';
+import 'controllers/staff_controller.dart';
+import 'controllers/history_controller.dart';
 
 class HomeController extends BaseController {
   
@@ -28,5 +26,30 @@ class HomeController extends BaseController {
   
   void changeSelectedIndex(int index) {
     selectedIndex.value = index;
+    // Refresh data when switching tabs
+    _refreshTabData(index);
+  }
+  
+  void _refreshTabData(int index) {
+    try {
+      switch (index) {
+        case 0: // Dashboard
+          final dashboardController = Get.find<DashboardController>();
+          dashboardController.refreshAllData();
+          break;
+        case 1: // Staff
+          final staffController = Get.find<StaffController>();
+          staffController.getMembers();
+          break;
+        case 2: // Guest QR Scanner - no need to refresh
+          break;
+        case 3: // History
+          final historyController = Get.find<HistoryController>();
+          historyController.fetchHistory();
+          break;
+      }
+    } catch (e) {
+      // Controller not found yet, ignore
+    }
   }
 }

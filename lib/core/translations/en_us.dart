@@ -93,8 +93,11 @@ const Map<String, String> enUS = {
 
   'overview': 'Overview',
   'personal_management': 'Personnel Management',
-  'anoymus_qr_reader': 'Anonymous QR Reader',
+  'anoymus_qr_reader': 'QR/CCCD Scanner',
   'history': 'Entry/Exit History',
+  'header_search_placeholder': 'Search staff, visitors...',
+  'language_vi': 'Vietnamese',
+  'language_en': 'English',
   
   // Dashboard
   'dashboard_overview': 'Overview',
@@ -124,6 +127,43 @@ const Map<String, String> enUS = {
   'dashboard_action': 'ACTION',
   'dashboard_working': 'Working',
   'dashboard_absent': 'Absent',
+
+  // QR / Guest common scan
+  'scan_mode_qr': 'Scan QR',
+  'scan_mode_cccd': 'Visitor (CCCD)',
+  'guest_scan_button': 'SCAN CCCD / QR',
+  'guest_scan_hint': 'or enter guest information manually below',
+  'qr_scan_ready_hint': 'Ready to scan QR to check-in/out.',
+  'qr_scan_loading': 'Scanning...',
+  'qr_scan_no_data': 'No data received or timed out.',
+  'qr_scan_error_title': 'Scan error',
+  'qr_scan_error': 'Scan error: {error}',
+  'qr_invalid_title': 'Invalid QR',
+  'qr_invalid_message': 'QR is not recognized. Please check and try again.',
+  'qr_checkin_title': 'Check-in',
+  'qr_checkout_title': 'Check-out',
+  'qr_checkin_success': '{name} check-in successful.',
+  'qr_checkout_success': '{name} check-out successful.',
+  'guest_info_title': 'VISITOR INFORMATION',
+  'guest_entry_info_title': 'ENTRY INFORMATION',
+  'guest_identity': 'CCCD / Identity number',
+  'guest_full_name': 'Full name',
+  'guest_dob': 'Date of birth',
+  'guest_address': 'Address',
+  'guest_reason': 'Reason / Destination',
+  'guest_clear_form': 'Clear form',
+  'guest_checkin_button': 'CONFIRM CHECK-IN',
+  'guest_validation_required': 'Please scan CCCD or enter visitor information.',
+  'guest_scan_success_title': 'CCCD scanned',
+  'guest_scan_success_message': 'Scanned successfully: {name}',
+  'guest_checkin_loading': 'Processing check-in...',
+  'guest_checkin_success': 'Check-in successful for: {name}',
+  'guest_checkin_error': 'Check-in error: {error}',
+
+  // QR dialog
+  'guest_qr_title': 'Visitor QR',
+  'guest_qr_subtitle': 'Use this QR for future check-in/out',
+  'qr_id': 'ID: {id}',
   
   // History
   'history_entry_exit': 'Entry/Exit History',

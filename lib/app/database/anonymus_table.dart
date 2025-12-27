@@ -5,7 +5,7 @@ class AnonymusTable extends Table{
 
   TextColumn get name => text().withLength(min: 1, max: 100)();
 
-  TextColumn get identityNumber => text().withLength(min: 5, max: 20)();
+  TextColumn get identityNumber => text().withLength(min: 5, max: 255)();
 
   TextColumn get address => text().withLength(min: 0, max: 255)();
   

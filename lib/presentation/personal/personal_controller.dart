@@ -8,6 +8,8 @@ import 'package:quanly/core/qr_reader/native_serial_reader.dart';
 import 'package:quanly/core/qr_reader/qr_reader_controller.dart';
 import 'package:quanly/extension/indentity_parse_extension.dart';
 import 'package:quanly/presentation/personal/widget/add_personal_popup.dart';
+import 'package:quanly/presentation/home/controllers/staff_controller.dart';
+import 'package:quanly/presentation/home/controllers/dashboard_controller.dart';
 import 'package:uuid/uuid.dart';
 
 class PersonalController extends BaseController{
@@ -125,6 +127,7 @@ class PersonalController extends BaseController{
 
   Future<void> addPersonal() async {
     try {
+      showLoading(message: 'Đang thêm cán bộ...');
       final MemberTableCompanion member = MemberTableCompanion(
         id: Value(Uuid().v4()),
         name: Value(nameController.text.trim()),
@@ -139,11 +142,19 @@ class PersonalController extends BaseController{
       );
 
       await AppDatabase.instance.createMemeber(member);
-      showSuccess('Thêm cán bộ thành công!');
-      // Clear form and close popup
+      hideLoading();
+      
+      // Clear form
       _clearForm();
+      // Close popup first, then show success message
       Get.back();
+      // Show success and refresh after popup is closed
+      Future.microtask(() {
+        showSuccess('Thêm cán bộ thành công!');
+        _refreshStaffController();
+      });
     } catch (e) {
+      hideLoading();
       showError('Lỗi khi thêm cán bộ: $e');
     }
   }
@@ -157,5 +168,23 @@ class PersonalController extends BaseController{
     phoneNumberController.clear();
     departmentId.value = '';
     sex.value = '';
+  }
+  
+  void _refreshStaffController() {
+    try {
+      // Import needed controllers here if not already imported
+      // For now, we'll use Get.find to refresh StaffController
+      if (Get.isRegistered<StaffController>()) {
+        final staffController = Get.find<StaffController>();
+        staffController.getMembers();
+      }
+      // Also refresh dashboard
+      if (Get.isRegistered<DashboardController>()) {
+        final dashboardController = Get.find<DashboardController>();
+        dashboardController.refreshAllData();
+      }
+    } catch (e) {
+      // Controllers not found, ignore
+    }
   }
 }

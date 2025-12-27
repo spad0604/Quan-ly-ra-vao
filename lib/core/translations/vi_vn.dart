@@ -93,8 +93,11 @@ const Map<String, String> viVN = {
 
   'overview': 'Tổng quan',
   'personal_management': 'Quản lý cán bộ',
-  'anoymus_qr_reader': 'Quét QR khách vãng lai',
+  'anoymus_qr_reader': 'Quét QR/CCCD',
   'history': 'Lịch sử ra vào',
+  'header_search_placeholder': 'Tìm kiếm cán bộ, khách...',
+  'language_vi': 'Tiếng Việt',
+  'language_en': 'English',
   
   // Dashboard
   'dashboard_overview': 'Tổng quan',
@@ -124,6 +127,43 @@ const Map<String, String> viVN = {
   'dashboard_action': 'HÀNH ĐỘNG',
   'dashboard_working': 'Đang làm việc',
   'dashboard_absent': 'Vắng mặt',
+
+  // QR / Guest common scan
+  'scan_mode_qr': 'Quét QR',
+  'scan_mode_cccd': 'Khách (CCCD)',
+  'guest_scan_button': 'QUÉT CCCD / QR',
+  'guest_scan_hint': 'hoặc nhập thủ công thông tin bên dưới',
+  'qr_scan_ready_hint': 'Sẵn sàng quét QR để check-in/out.',
+  'qr_scan_loading': 'Đang quét...',
+  'qr_scan_no_data': 'Không nhận được dữ liệu hoặc hết thời gian.',
+  'qr_scan_error_title': 'Lỗi quét',
+  'qr_scan_error': 'Lỗi khi quét: {error}',
+  'qr_invalid_title': 'QR không hợp lệ',
+  'qr_invalid_message': 'QR không nhận diện được. Vui lòng kiểm tra và thử lại.',
+  'qr_checkin_title': 'Check-in',
+  'qr_checkout_title': 'Check-out',
+  'qr_checkin_success': '{name} check-in thành công.',
+  'qr_checkout_success': '{name} check-out thành công.',
+  'guest_info_title': 'THÔNG TIN KHÁCH',
+  'guest_entry_info_title': 'THÔNG TIN RA VÀO',
+  'guest_identity': 'Số CCCD / Định danh',
+  'guest_full_name': 'Họ và tên',
+  'guest_dob': 'Ngày sinh',
+  'guest_address': 'Quê quán / Địa chỉ',
+  'guest_reason': 'Lý do vào / Nơi đến',
+  'guest_clear_form': 'Xóa form',
+  'guest_checkin_button': 'XÁC NHẬN VÀO (CHECK-IN)',
+  'guest_validation_required': 'Vui lòng quét CCCD hoặc nhập thông tin khách',
+  'guest_scan_success_title': 'Đã quét CCCD',
+  'guest_scan_success_message': 'Đọc thẻ thành công: {name}',
+  'guest_checkin_loading': 'Đang xử lý check-in...',
+  'guest_checkin_success': 'Check-in thành công cho khách: {name}',
+  'guest_checkin_error': 'Lỗi check-in: {error}',
+
+  // QR dialog
+  'guest_qr_title': 'QR của Khách',
+  'guest_qr_subtitle': 'Dùng QR này để check-in/out lần sau',
+  'qr_id': 'ID: {id}',
   
   // History
   'history_entry_exit': 'Lịch sử Ra vào',
