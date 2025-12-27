@@ -10,6 +10,8 @@ class AnonymusTable extends Table{
   TextColumn get address => text().withLength(min: 0, max: 255)();
   
   TextColumn get dateOfBirth => text().withLength(min: 0, max: 20)();
+
+  TextColumn get reason => text().withLength(min: 0, max: 255)();
   
   @override
   Set<Column> get primaryKey => {id};

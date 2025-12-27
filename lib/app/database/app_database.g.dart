@@ -81,6 +81,19 @@ class $TimeManagementTableTable extends TimeManagementTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -89,6 +102,7 @@ class $TimeManagementTableTable extends TimeManagementTable
     checkOutTime,
     note,
     status,
+    role,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -149,6 +163,14 @@ class $TimeManagementTableTable extends TimeManagementTable
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
     return context;
   }
 
@@ -185,6 +207,10 @@ class $TimeManagementTableTable extends TimeManagementTable
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
     );
   }
 
@@ -202,6 +228,7 @@ class TimeManagementTableData extends DataClass
   final DateTime? checkOutTime;
   final String? note;
   final String status;
+  final String role;
   const TimeManagementTableData({
     required this.id,
     required this.memberId,
@@ -209,6 +236,7 @@ class TimeManagementTableData extends DataClass
     this.checkOutTime,
     this.note,
     required this.status,
+    required this.role,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -223,6 +251,7 @@ class TimeManagementTableData extends DataClass
       map['note'] = Variable<String>(note);
     }
     map['status'] = Variable<String>(status);
+    map['role'] = Variable<String>(role);
     return map;
   }
 
@@ -236,6 +265,7 @@ class TimeManagementTableData extends DataClass
           : Value(checkOutTime),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       status: Value(status),
+      role: Value(role),
     );
   }
 
@@ -251,6 +281,7 @@ class TimeManagementTableData extends DataClass
       checkOutTime: serializer.fromJson<DateTime?>(json['checkOutTime']),
       note: serializer.fromJson<String?>(json['note']),
       status: serializer.fromJson<String>(json['status']),
+      role: serializer.fromJson<String>(json['role']),
     );
   }
   @override
@@ -263,6 +294,7 @@ class TimeManagementTableData extends DataClass
       'checkOutTime': serializer.toJson<DateTime?>(checkOutTime),
       'note': serializer.toJson<String?>(note),
       'status': serializer.toJson<String>(status),
+      'role': serializer.toJson<String>(role),
     };
   }
 
@@ -273,6 +305,7 @@ class TimeManagementTableData extends DataClass
     Value<DateTime?> checkOutTime = const Value.absent(),
     Value<String?> note = const Value.absent(),
     String? status,
+    String? role,
   }) => TimeManagementTableData(
     id: id ?? this.id,
     memberId: memberId ?? this.memberId,
@@ -280,6 +313,7 @@ class TimeManagementTableData extends DataClass
     checkOutTime: checkOutTime.present ? checkOutTime.value : this.checkOutTime,
     note: note.present ? note.value : this.note,
     status: status ?? this.status,
+    role: role ?? this.role,
   );
   TimeManagementTableData copyWithCompanion(TimeManagementTableCompanion data) {
     return TimeManagementTableData(
@@ -293,6 +327,7 @@ class TimeManagementTableData extends DataClass
           : this.checkOutTime,
       note: data.note.present ? data.note.value : this.note,
       status: data.status.present ? data.status.value : this.status,
+      role: data.role.present ? data.role.value : this.role,
     );
   }
 
@@ -304,14 +339,15 @@ class TimeManagementTableData extends DataClass
           ..write('checkInTime: $checkInTime, ')
           ..write('checkOutTime: $checkOutTime, ')
           ..write('note: $note, ')
-          ..write('status: $status')
+          ..write('status: $status, ')
+          ..write('role: $role')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, memberId, checkInTime, checkOutTime, note, status);
+      Object.hash(id, memberId, checkInTime, checkOutTime, note, status, role);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -321,7 +357,8 @@ class TimeManagementTableData extends DataClass
           other.checkInTime == this.checkInTime &&
           other.checkOutTime == this.checkOutTime &&
           other.note == this.note &&
-          other.status == this.status);
+          other.status == this.status &&
+          other.role == this.role);
 }
 
 class TimeManagementTableCompanion
@@ -332,6 +369,7 @@ class TimeManagementTableCompanion
   final Value<DateTime?> checkOutTime;
   final Value<String?> note;
   final Value<String> status;
+  final Value<String> role;
   final Value<int> rowid;
   const TimeManagementTableCompanion({
     this.id = const Value.absent(),
@@ -340,6 +378,7 @@ class TimeManagementTableCompanion
     this.checkOutTime = const Value.absent(),
     this.note = const Value.absent(),
     this.status = const Value.absent(),
+    this.role = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TimeManagementTableCompanion.insert({
@@ -349,11 +388,13 @@ class TimeManagementTableCompanion
     this.checkOutTime = const Value.absent(),
     this.note = const Value.absent(),
     required String status,
+    required String role,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        memberId = Value(memberId),
        checkInTime = Value(checkInTime),
-       status = Value(status);
+       status = Value(status),
+       role = Value(role);
   static Insertable<TimeManagementTableData> custom({
     Expression<String>? id,
     Expression<String>? memberId,
@@ -361,6 +402,7 @@ class TimeManagementTableCompanion
     Expression<DateTime>? checkOutTime,
     Expression<String>? note,
     Expression<String>? status,
+    Expression<String>? role,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -370,6 +412,7 @@ class TimeManagementTableCompanion
       if (checkOutTime != null) 'check_out_time': checkOutTime,
       if (note != null) 'note': note,
       if (status != null) 'status': status,
+      if (role != null) 'role': role,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -381,6 +424,7 @@ class TimeManagementTableCompanion
     Value<DateTime?>? checkOutTime,
     Value<String?>? note,
     Value<String>? status,
+    Value<String>? role,
     Value<int>? rowid,
   }) {
     return TimeManagementTableCompanion(
@@ -390,6 +434,7 @@ class TimeManagementTableCompanion
       checkOutTime: checkOutTime ?? this.checkOutTime,
       note: note ?? this.note,
       status: status ?? this.status,
+      role: role ?? this.role,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -415,6 +460,9 @@ class TimeManagementTableCompanion
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -430,6 +478,7 @@ class TimeManagementTableCompanion
           ..write('checkOutTime: $checkOutTime, ')
           ..write('note: $note, ')
           ..write('status: $status, ')
+          ..write('role: $role, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -493,7 +542,7 @@ class $MemberTableTable extends MemberTable
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
       minTextLength: 5,
-      maxTextLength: 20,
+      maxTextLength: 255,
     ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
@@ -543,6 +592,49 @@ class $MemberTableTable extends MemberTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _departmentIdMeta = const VerificationMeta(
+    'departmentId',
+  );
+  @override
+  late final GeneratedColumn<String> departmentId = GeneratedColumn<String>(
+    'department_id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<String> position = GeneratedColumn<String>(
+    'position',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sexMeta = const VerificationMeta('sex');
+  @override
+  late final GeneratedColumn<String> sex = GeneratedColumn<String>(
+    'sex',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 10,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -552,6 +644,9 @@ class $MemberTableTable extends MemberTable
     imageUrl,
     address,
     dateOfBirth,
+    departmentId,
+    position,
+    sex,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -627,6 +722,33 @@ class $MemberTableTable extends MemberTable
     } else if (isInserting) {
       context.missing(_dateOfBirthMeta);
     }
+    if (data.containsKey('department_id')) {
+      context.handle(
+        _departmentIdMeta,
+        departmentId.isAcceptableOrUnknown(
+          data['department_id']!,
+          _departmentIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_departmentIdMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_positionMeta);
+    }
+    if (data.containsKey('sex')) {
+      context.handle(
+        _sexMeta,
+        sex.isAcceptableOrUnknown(data['sex']!, _sexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sexMeta);
+    }
     return context;
   }
 
@@ -664,6 +786,18 @@ class $MemberTableTable extends MemberTable
         DriftSqlType.string,
         data['${effectivePrefix}date_of_birth'],
       )!,
+      departmentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}department_id'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}position'],
+      )!,
+      sex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sex'],
+      )!,
     );
   }
 
@@ -681,6 +815,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
   final String imageUrl;
   final String address;
   final String dateOfBirth;
+  final String departmentId;
+  final String position;
+  final String sex;
   const MemberTableData({
     required this.id,
     required this.name,
@@ -689,6 +826,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     required this.imageUrl,
     required this.address,
     required this.dateOfBirth,
+    required this.departmentId,
+    required this.position,
+    required this.sex,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -700,6 +840,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     map['image_url'] = Variable<String>(imageUrl);
     map['address'] = Variable<String>(address);
     map['date_of_birth'] = Variable<String>(dateOfBirth);
+    map['department_id'] = Variable<String>(departmentId);
+    map['position'] = Variable<String>(position);
+    map['sex'] = Variable<String>(sex);
     return map;
   }
 
@@ -712,6 +855,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
       imageUrl: Value(imageUrl),
       address: Value(address),
       dateOfBirth: Value(dateOfBirth),
+      departmentId: Value(departmentId),
+      position: Value(position),
+      sex: Value(sex),
     );
   }
 
@@ -728,6 +874,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
       imageUrl: serializer.fromJson<String>(json['imageUrl']),
       address: serializer.fromJson<String>(json['address']),
       dateOfBirth: serializer.fromJson<String>(json['dateOfBirth']),
+      departmentId: serializer.fromJson<String>(json['departmentId']),
+      position: serializer.fromJson<String>(json['position']),
+      sex: serializer.fromJson<String>(json['sex']),
     );
   }
   @override
@@ -741,6 +890,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
       'imageUrl': serializer.toJson<String>(imageUrl),
       'address': serializer.toJson<String>(address),
       'dateOfBirth': serializer.toJson<String>(dateOfBirth),
+      'departmentId': serializer.toJson<String>(departmentId),
+      'position': serializer.toJson<String>(position),
+      'sex': serializer.toJson<String>(sex),
     };
   }
 
@@ -752,6 +904,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     String? imageUrl,
     String? address,
     String? dateOfBirth,
+    String? departmentId,
+    String? position,
+    String? sex,
   }) => MemberTableData(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -760,6 +915,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     imageUrl: imageUrl ?? this.imageUrl,
     address: address ?? this.address,
     dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+    departmentId: departmentId ?? this.departmentId,
+    position: position ?? this.position,
+    sex: sex ?? this.sex,
   );
   MemberTableData copyWithCompanion(MemberTableCompanion data) {
     return MemberTableData(
@@ -776,6 +934,11 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
       dateOfBirth: data.dateOfBirth.present
           ? data.dateOfBirth.value
           : this.dateOfBirth,
+      departmentId: data.departmentId.present
+          ? data.departmentId.value
+          : this.departmentId,
+      position: data.position.present ? data.position.value : this.position,
+      sex: data.sex.present ? data.sex.value : this.sex,
     );
   }
 
@@ -788,7 +951,10 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
           ..write('identityNumber: $identityNumber, ')
           ..write('imageUrl: $imageUrl, ')
           ..write('address: $address, ')
-          ..write('dateOfBirth: $dateOfBirth')
+          ..write('dateOfBirth: $dateOfBirth, ')
+          ..write('departmentId: $departmentId, ')
+          ..write('position: $position, ')
+          ..write('sex: $sex')
           ..write(')'))
         .toString();
   }
@@ -802,6 +968,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     imageUrl,
     address,
     dateOfBirth,
+    departmentId,
+    position,
+    sex,
   );
   @override
   bool operator ==(Object other) =>
@@ -813,7 +982,10 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
           other.identityNumber == this.identityNumber &&
           other.imageUrl == this.imageUrl &&
           other.address == this.address &&
-          other.dateOfBirth == this.dateOfBirth);
+          other.dateOfBirth == this.dateOfBirth &&
+          other.departmentId == this.departmentId &&
+          other.position == this.position &&
+          other.sex == this.sex);
 }
 
 class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
@@ -824,6 +996,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
   final Value<String> imageUrl;
   final Value<String> address;
   final Value<String> dateOfBirth;
+  final Value<String> departmentId;
+  final Value<String> position;
+  final Value<String> sex;
   final Value<int> rowid;
   const MemberTableCompanion({
     this.id = const Value.absent(),
@@ -833,6 +1008,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     this.imageUrl = const Value.absent(),
     this.address = const Value.absent(),
     this.dateOfBirth = const Value.absent(),
+    this.departmentId = const Value.absent(),
+    this.position = const Value.absent(),
+    this.sex = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MemberTableCompanion.insert({
@@ -843,6 +1021,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     required String imageUrl,
     required String address,
     required String dateOfBirth,
+    required String departmentId,
+    required String position,
+    required String sex,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -850,7 +1031,10 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
        identityNumber = Value(identityNumber),
        imageUrl = Value(imageUrl),
        address = Value(address),
-       dateOfBirth = Value(dateOfBirth);
+       dateOfBirth = Value(dateOfBirth),
+       departmentId = Value(departmentId),
+       position = Value(position),
+       sex = Value(sex);
   static Insertable<MemberTableData> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -859,6 +1043,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     Expression<String>? imageUrl,
     Expression<String>? address,
     Expression<String>? dateOfBirth,
+    Expression<String>? departmentId,
+    Expression<String>? position,
+    Expression<String>? sex,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -869,6 +1056,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
       if (imageUrl != null) 'image_url': imageUrl,
       if (address != null) 'address': address,
       if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
+      if (departmentId != null) 'department_id': departmentId,
+      if (position != null) 'position': position,
+      if (sex != null) 'sex': sex,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -881,6 +1071,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     Value<String>? imageUrl,
     Value<String>? address,
     Value<String>? dateOfBirth,
+    Value<String>? departmentId,
+    Value<String>? position,
+    Value<String>? sex,
     Value<int>? rowid,
   }) {
     return MemberTableCompanion(
@@ -891,6 +1084,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
       imageUrl: imageUrl ?? this.imageUrl,
       address: address ?? this.address,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      departmentId: departmentId ?? this.departmentId,
+      position: position ?? this.position,
+      sex: sex ?? this.sex,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -919,6 +1115,15 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     if (dateOfBirth.present) {
       map['date_of_birth'] = Variable<String>(dateOfBirth.value);
     }
+    if (departmentId.present) {
+      map['department_id'] = Variable<String>(departmentId.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<String>(position.value);
+    }
+    if (sex.present) {
+      map['sex'] = Variable<String>(sex.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -935,6 +1140,9 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
           ..write('imageUrl: $imageUrl, ')
           ..write('address: $address, ')
           ..write('dateOfBirth: $dateOfBirth, ')
+          ..write('departmentId: $departmentId, ')
+          ..write('position: $position, ')
+          ..write('sex: $sex, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1383,6 +1591,661 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
   }
 }
 
+class $DepartmentTableTable extends DepartmentTable
+    with TableInfo<$DepartmentTableTable, DepartmentTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DepartmentTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'department_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DepartmentTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DepartmentTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DepartmentTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+    );
+  }
+
+  @override
+  $DepartmentTableTable createAlias(String alias) {
+    return $DepartmentTableTable(attachedDatabase, alias);
+  }
+}
+
+class DepartmentTableData extends DataClass
+    implements Insertable<DepartmentTableData> {
+  final String id;
+  final String name;
+  const DepartmentTableData({required this.id, required this.name});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    return map;
+  }
+
+  DepartmentTableCompanion toCompanion(bool nullToAbsent) {
+    return DepartmentTableCompanion(id: Value(id), name: Value(name));
+  }
+
+  factory DepartmentTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DepartmentTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+    };
+  }
+
+  DepartmentTableData copyWith({String? id, String? name}) =>
+      DepartmentTableData(id: id ?? this.id, name: name ?? this.name);
+  DepartmentTableData copyWithCompanion(DepartmentTableCompanion data) {
+    return DepartmentTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DepartmentTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DepartmentTableData &&
+          other.id == this.id &&
+          other.name == this.name);
+}
+
+class DepartmentTableCompanion extends UpdateCompanion<DepartmentTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<int> rowid;
+  const DepartmentTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DepartmentTableCompanion.insert({
+    required String id,
+    required String name,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<DepartmentTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DepartmentTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<int>? rowid,
+  }) {
+    return DepartmentTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DepartmentTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AnonymusTableTable extends AnonymusTable
+    with TableInfo<$AnonymusTableTable, AnonymusTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AnonymusTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _identityNumberMeta = const VerificationMeta(
+    'identityNumber',
+  );
+  @override
+  late final GeneratedColumn<String> identityNumber = GeneratedColumn<String>(
+    'identity_number',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 5,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
+  );
+  @override
+  late final GeneratedColumn<String> address = GeneratedColumn<String>(
+    'address',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 255,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dateOfBirthMeta = const VerificationMeta(
+    'dateOfBirth',
+  );
+  @override
+  late final GeneratedColumn<String> dateOfBirth = GeneratedColumn<String>(
+    'date_of_birth',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 255,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    identityNumber,
+    address,
+    dateOfBirth,
+    reason,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'anonymus_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AnonymusTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('identity_number')) {
+      context.handle(
+        _identityNumberMeta,
+        identityNumber.isAcceptableOrUnknown(
+          data['identity_number']!,
+          _identityNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_identityNumberMeta);
+    }
+    if (data.containsKey('address')) {
+      context.handle(
+        _addressMeta,
+        address.isAcceptableOrUnknown(data['address']!, _addressMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_addressMeta);
+    }
+    if (data.containsKey('date_of_birth')) {
+      context.handle(
+        _dateOfBirthMeta,
+        dateOfBirth.isAcceptableOrUnknown(
+          data['date_of_birth']!,
+          _dateOfBirthMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dateOfBirthMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AnonymusTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AnonymusTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      identityNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}identity_number'],
+      )!,
+      address: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address'],
+      )!,
+      dateOfBirth: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date_of_birth'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+    );
+  }
+
+  @override
+  $AnonymusTableTable createAlias(String alias) {
+    return $AnonymusTableTable(attachedDatabase, alias);
+  }
+}
+
+class AnonymusTableData extends DataClass
+    implements Insertable<AnonymusTableData> {
+  final String id;
+  final String name;
+  final String identityNumber;
+  final String address;
+  final String dateOfBirth;
+  final String reason;
+  const AnonymusTableData({
+    required this.id,
+    required this.name,
+    required this.identityNumber,
+    required this.address,
+    required this.dateOfBirth,
+    required this.reason,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['identity_number'] = Variable<String>(identityNumber);
+    map['address'] = Variable<String>(address);
+    map['date_of_birth'] = Variable<String>(dateOfBirth);
+    map['reason'] = Variable<String>(reason);
+    return map;
+  }
+
+  AnonymusTableCompanion toCompanion(bool nullToAbsent) {
+    return AnonymusTableCompanion(
+      id: Value(id),
+      name: Value(name),
+      identityNumber: Value(identityNumber),
+      address: Value(address),
+      dateOfBirth: Value(dateOfBirth),
+      reason: Value(reason),
+    );
+  }
+
+  factory AnonymusTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AnonymusTableData(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      identityNumber: serializer.fromJson<String>(json['identityNumber']),
+      address: serializer.fromJson<String>(json['address']),
+      dateOfBirth: serializer.fromJson<String>(json['dateOfBirth']),
+      reason: serializer.fromJson<String>(json['reason']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'identityNumber': serializer.toJson<String>(identityNumber),
+      'address': serializer.toJson<String>(address),
+      'dateOfBirth': serializer.toJson<String>(dateOfBirth),
+      'reason': serializer.toJson<String>(reason),
+    };
+  }
+
+  AnonymusTableData copyWith({
+    String? id,
+    String? name,
+    String? identityNumber,
+    String? address,
+    String? dateOfBirth,
+    String? reason,
+  }) => AnonymusTableData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    identityNumber: identityNumber ?? this.identityNumber,
+    address: address ?? this.address,
+    dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+    reason: reason ?? this.reason,
+  );
+  AnonymusTableData copyWithCompanion(AnonymusTableCompanion data) {
+    return AnonymusTableData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      identityNumber: data.identityNumber.present
+          ? data.identityNumber.value
+          : this.identityNumber,
+      address: data.address.present ? data.address.value : this.address,
+      dateOfBirth: data.dateOfBirth.present
+          ? data.dateOfBirth.value
+          : this.dateOfBirth,
+      reason: data.reason.present ? data.reason.value : this.reason,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnonymusTableData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('address: $address, ')
+          ..write('dateOfBirth: $dateOfBirth, ')
+          ..write('reason: $reason')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, identityNumber, address, dateOfBirth, reason);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AnonymusTableData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.identityNumber == this.identityNumber &&
+          other.address == this.address &&
+          other.dateOfBirth == this.dateOfBirth &&
+          other.reason == this.reason);
+}
+
+class AnonymusTableCompanion extends UpdateCompanion<AnonymusTableData> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> identityNumber;
+  final Value<String> address;
+  final Value<String> dateOfBirth;
+  final Value<String> reason;
+  final Value<int> rowid;
+  const AnonymusTableCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.identityNumber = const Value.absent(),
+    this.address = const Value.absent(),
+    this.dateOfBirth = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AnonymusTableCompanion.insert({
+    required String id,
+    required String name,
+    required String identityNumber,
+    required String address,
+    required String dateOfBirth,
+    required String reason,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       identityNumber = Value(identityNumber),
+       address = Value(address),
+       dateOfBirth = Value(dateOfBirth),
+       reason = Value(reason);
+  static Insertable<AnonymusTableData> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? identityNumber,
+    Expression<String>? address,
+    Expression<String>? dateOfBirth,
+    Expression<String>? reason,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (identityNumber != null) 'identity_number': identityNumber,
+      if (address != null) 'address': address,
+      if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
+      if (reason != null) 'reason': reason,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AnonymusTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? identityNumber,
+    Value<String>? address,
+    Value<String>? dateOfBirth,
+    Value<String>? reason,
+    Value<int>? rowid,
+  }) {
+    return AnonymusTableCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      identityNumber: identityNumber ?? this.identityNumber,
+      address: address ?? this.address,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      reason: reason ?? this.reason,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (identityNumber.present) {
+      map['identity_number'] = Variable<String>(identityNumber.value);
+    }
+    if (address.present) {
+      map['address'] = Variable<String>(address.value);
+    }
+    if (dateOfBirth.present) {
+      map['date_of_birth'] = Variable<String>(dateOfBirth.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AnonymusTableCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('address: $address, ')
+          ..write('dateOfBirth: $dateOfBirth, ')
+          ..write('reason: $reason, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1390,6 +2253,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $TimeManagementTableTable(this);
   late final $MemberTableTable memberTable = $MemberTableTable(this);
   late final $AdminTableTable adminTable = $AdminTableTable(this);
+  late final $DepartmentTableTable departmentTable = $DepartmentTableTable(
+    this,
+  );
+  late final $AnonymusTableTable anonymusTable = $AnonymusTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1398,6 +2265,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     timeManagementTable,
     memberTable,
     adminTable,
+    departmentTable,
+    anonymusTable,
   ];
 }
 
@@ -1409,6 +2278,7 @@ typedef $$TimeManagementTableTableCreateCompanionBuilder =
       Value<DateTime?> checkOutTime,
       Value<String?> note,
       required String status,
+      required String role,
       Value<int> rowid,
     });
 typedef $$TimeManagementTableTableUpdateCompanionBuilder =
@@ -1419,6 +2289,7 @@ typedef $$TimeManagementTableTableUpdateCompanionBuilder =
       Value<DateTime?> checkOutTime,
       Value<String?> note,
       Value<String> status,
+      Value<String> role,
       Value<int> rowid,
     });
 
@@ -1458,6 +2329,11 @@ class $$TimeManagementTableTableFilterComposer
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1500,6 +2376,11 @@ class $$TimeManagementTableTableOrderingComposer
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TimeManagementTableTableAnnotationComposer
@@ -1532,6 +2413,9 @@ class $$TimeManagementTableTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
 }
 
 class $$TimeManagementTableTableTableManager
@@ -1583,6 +2467,7 @@ class $$TimeManagementTableTableTableManager
                 Value<DateTime?> checkOutTime = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String> role = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TimeManagementTableCompanion(
                 id: id,
@@ -1591,6 +2476,7 @@ class $$TimeManagementTableTableTableManager
                 checkOutTime: checkOutTime,
                 note: note,
                 status: status,
+                role: role,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1601,6 +2487,7 @@ class $$TimeManagementTableTableTableManager
                 Value<DateTime?> checkOutTime = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 required String status,
+                required String role,
                 Value<int> rowid = const Value.absent(),
               }) => TimeManagementTableCompanion.insert(
                 id: id,
@@ -1609,6 +2496,7 @@ class $$TimeManagementTableTableTableManager
                 checkOutTime: checkOutTime,
                 note: note,
                 status: status,
+                role: role,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -1649,6 +2537,9 @@ typedef $$MemberTableTableCreateCompanionBuilder =
       required String imageUrl,
       required String address,
       required String dateOfBirth,
+      required String departmentId,
+      required String position,
+      required String sex,
       Value<int> rowid,
     });
 typedef $$MemberTableTableUpdateCompanionBuilder =
@@ -1660,6 +2551,9 @@ typedef $$MemberTableTableUpdateCompanionBuilder =
       Value<String> imageUrl,
       Value<String> address,
       Value<String> dateOfBirth,
+      Value<String> departmentId,
+      Value<String> position,
+      Value<String> sex,
       Value<int> rowid,
     });
 
@@ -1704,6 +2598,21 @@ class $$MemberTableTableFilterComposer
 
   ColumnFilters<String> get dateOfBirth => $composableBuilder(
     column: $table.dateOfBirth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get departmentId => $composableBuilder(
+    column: $table.departmentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sex => $composableBuilder(
+    column: $table.sex,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1751,6 +2660,21 @@ class $$MemberTableTableOrderingComposer
     column: $table.dateOfBirth,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get departmentId => $composableBuilder(
+    column: $table.departmentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sex => $composableBuilder(
+    column: $table.sex,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MemberTableTableAnnotationComposer
@@ -1788,6 +2712,17 @@ class $$MemberTableTableAnnotationComposer
     column: $table.dateOfBirth,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get departmentId => $composableBuilder(
+    column: $table.departmentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get sex =>
+      $composableBuilder(column: $table.sex, builder: (column) => column);
 }
 
 class $$MemberTableTableTableManager
@@ -1828,6 +2763,9 @@ class $$MemberTableTableTableManager
                 Value<String> imageUrl = const Value.absent(),
                 Value<String> address = const Value.absent(),
                 Value<String> dateOfBirth = const Value.absent(),
+                Value<String> departmentId = const Value.absent(),
+                Value<String> position = const Value.absent(),
+                Value<String> sex = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MemberTableCompanion(
                 id: id,
@@ -1837,6 +2775,9 @@ class $$MemberTableTableTableManager
                 imageUrl: imageUrl,
                 address: address,
                 dateOfBirth: dateOfBirth,
+                departmentId: departmentId,
+                position: position,
+                sex: sex,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1848,6 +2789,9 @@ class $$MemberTableTableTableManager
                 required String imageUrl,
                 required String address,
                 required String dateOfBirth,
+                required String departmentId,
+                required String position,
+                required String sex,
                 Value<int> rowid = const Value.absent(),
               }) => MemberTableCompanion.insert(
                 id: id,
@@ -1857,6 +2801,9 @@ class $$MemberTableTableTableManager
                 imageUrl: imageUrl,
                 address: address,
                 dateOfBirth: dateOfBirth,
+                departmentId: departmentId,
+                position: position,
+                sex: sex,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2107,6 +3054,382 @@ typedef $$AdminTableTableProcessedTableManager =
       AdminTableData,
       PrefetchHooks Function()
     >;
+typedef $$DepartmentTableTableCreateCompanionBuilder =
+    DepartmentTableCompanion Function({
+      required String id,
+      required String name,
+      Value<int> rowid,
+    });
+typedef $$DepartmentTableTableUpdateCompanionBuilder =
+    DepartmentTableCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<int> rowid,
+    });
+
+class $$DepartmentTableTableFilterComposer
+    extends Composer<_$AppDatabase, $DepartmentTableTable> {
+  $$DepartmentTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DepartmentTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $DepartmentTableTable> {
+  $$DepartmentTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DepartmentTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DepartmentTableTable> {
+  $$DepartmentTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+}
+
+class $$DepartmentTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DepartmentTableTable,
+          DepartmentTableData,
+          $$DepartmentTableTableFilterComposer,
+          $$DepartmentTableTableOrderingComposer,
+          $$DepartmentTableTableAnnotationComposer,
+          $$DepartmentTableTableCreateCompanionBuilder,
+          $$DepartmentTableTableUpdateCompanionBuilder,
+          (
+            DepartmentTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $DepartmentTableTable,
+              DepartmentTableData
+            >,
+          ),
+          DepartmentTableData,
+          PrefetchHooks Function()
+        > {
+  $$DepartmentTableTableTableManager(
+    _$AppDatabase db,
+    $DepartmentTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DepartmentTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DepartmentTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DepartmentTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DepartmentTableCompanion(id: id, name: name, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<int> rowid = const Value.absent(),
+              }) => DepartmentTableCompanion.insert(
+                id: id,
+                name: name,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DepartmentTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DepartmentTableTable,
+      DepartmentTableData,
+      $$DepartmentTableTableFilterComposer,
+      $$DepartmentTableTableOrderingComposer,
+      $$DepartmentTableTableAnnotationComposer,
+      $$DepartmentTableTableCreateCompanionBuilder,
+      $$DepartmentTableTableUpdateCompanionBuilder,
+      (
+        DepartmentTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $DepartmentTableTable,
+          DepartmentTableData
+        >,
+      ),
+      DepartmentTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$AnonymusTableTableCreateCompanionBuilder =
+    AnonymusTableCompanion Function({
+      required String id,
+      required String name,
+      required String identityNumber,
+      required String address,
+      required String dateOfBirth,
+      required String reason,
+      Value<int> rowid,
+    });
+typedef $$AnonymusTableTableUpdateCompanionBuilder =
+    AnonymusTableCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> identityNumber,
+      Value<String> address,
+      Value<String> dateOfBirth,
+      Value<String> reason,
+      Value<int> rowid,
+    });
+
+class $$AnonymusTableTableFilterComposer
+    extends Composer<_$AppDatabase, $AnonymusTableTable> {
+  $$AnonymusTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get identityNumber => $composableBuilder(
+    column: $table.identityNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AnonymusTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $AnonymusTableTable> {
+  $$AnonymusTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get identityNumber => $composableBuilder(
+    column: $table.identityNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get address => $composableBuilder(
+    column: $table.address,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AnonymusTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AnonymusTableTable> {
+  $$AnonymusTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get identityNumber => $composableBuilder(
+    column: $table.identityNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get address =>
+      $composableBuilder(column: $table.address, builder: (column) => column);
+
+  GeneratedColumn<String> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+}
+
+class $$AnonymusTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AnonymusTableTable,
+          AnonymusTableData,
+          $$AnonymusTableTableFilterComposer,
+          $$AnonymusTableTableOrderingComposer,
+          $$AnonymusTableTableAnnotationComposer,
+          $$AnonymusTableTableCreateCompanionBuilder,
+          $$AnonymusTableTableUpdateCompanionBuilder,
+          (
+            AnonymusTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $AnonymusTableTable,
+              AnonymusTableData
+            >,
+          ),
+          AnonymusTableData,
+          PrefetchHooks Function()
+        > {
+  $$AnonymusTableTableTableManager(_$AppDatabase db, $AnonymusTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AnonymusTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AnonymusTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AnonymusTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> identityNumber = const Value.absent(),
+                Value<String> address = const Value.absent(),
+                Value<String> dateOfBirth = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AnonymusTableCompanion(
+                id: id,
+                name: name,
+                identityNumber: identityNumber,
+                address: address,
+                dateOfBirth: dateOfBirth,
+                reason: reason,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String identityNumber,
+                required String address,
+                required String dateOfBirth,
+                required String reason,
+                Value<int> rowid = const Value.absent(),
+              }) => AnonymusTableCompanion.insert(
+                id: id,
+                name: name,
+                identityNumber: identityNumber,
+                address: address,
+                dateOfBirth: dateOfBirth,
+                reason: reason,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AnonymusTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AnonymusTableTable,
+      AnonymusTableData,
+      $$AnonymusTableTableFilterComposer,
+      $$AnonymusTableTableOrderingComposer,
+      $$AnonymusTableTableAnnotationComposer,
+      $$AnonymusTableTableCreateCompanionBuilder,
+      $$AnonymusTableTableUpdateCompanionBuilder,
+      (
+        AnonymusTableData,
+        BaseReferences<_$AppDatabase, $AnonymusTableTable, AnonymusTableData>,
+      ),
+      AnonymusTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2117,4 +3440,8 @@ class $AppDatabaseManager {
       $$MemberTableTableTableManager(_db, _db.memberTable);
   $$AdminTableTableTableManager get adminTable =>
       $$AdminTableTableTableManager(_db, _db.adminTable);
+  $$DepartmentTableTableTableManager get departmentTable =>
+      $$DepartmentTableTableTableManager(_db, _db.departmentTable);
+  $$AnonymusTableTableTableManager get anonymusTable =>
+      $$AnonymusTableTableTableManager(_db, _db.anonymusTable);
 }

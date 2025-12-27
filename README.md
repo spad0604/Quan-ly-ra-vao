@@ -550,6 +550,8 @@ Base này có thể dễ dàng mở rộng với:
 
 MIT License - Free to use and modify.
 
+'''dart run build_runner build --delete-conflicting-outputs'''
+
 ---
 
 **Developed with ❤️ using Flutter & GetX**

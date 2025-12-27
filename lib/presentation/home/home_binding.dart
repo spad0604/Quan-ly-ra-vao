@@ -1,4 +1,8 @@
 import 'package:get/get.dart';
+import 'package:quanly/presentation/home/controllers/dashboard_controller.dart';
+import 'package:quanly/presentation/home/controllers/guest_controller.dart';
+import 'package:quanly/presentation/home/controllers/history_controller.dart';
+import 'package:quanly/presentation/home/controllers/staff_controller.dart';
 import 'package:quanly/presentation/personal/personal_controller.dart';
 
 import '../../core/network/dio_client.dart';
@@ -26,5 +30,11 @@ class HomeBinding extends Bindings {
     Get.lazyPut(() => QrReaderController());
     // Inject PersonalController
     Get.lazyPut(() => PersonalController());
+
+    // Inject Tab Controllers
+    Get.lazyPut(() => DashboardController());
+    Get.lazyPut(() => StaffController());
+    Get.lazyPut(() => GuestController());
+    Get.lazyPut(() => HistoryController());
   }
 }
