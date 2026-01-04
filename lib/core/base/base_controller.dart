@@ -10,7 +10,15 @@ abstract class BaseController extends GetxController {
   String? get errorMessage => _errorMessage.value;
   set errorMessage(String? value) => _errorMessage.value = value;
   
+  bool _loadingDialogOpen = false;
+  
   void showLoading({String? message}) {
+    // Close any existing loading dialog first
+    if (_loadingDialogOpen) {
+      _forceCloseLoading();
+    }
+    
+    _loadingDialogOpen = true;
     Get.dialog(
       WillPopScope(
         onWillPop: () async => false,
@@ -33,14 +41,38 @@ abstract class BaseController extends GetxController {
         ),
       ),
       barrierDismissible: false,
-    );
+    ).then((_) {
+      // Dialog was closed, update flag
+      _loadingDialogOpen = false;
+    }).catchError((_) {
+      _loadingDialogOpen = false;
+    });
+  }
+  
+  /// Force close loading dialog
+  void _forceCloseLoading() {
+    int attempts = 0;
+    while (attempts < 5 && (Get.isDialogOpen == true || _loadingDialogOpen)) {
+      try {
+        if (Get.isDialogOpen == true) {
+          Get.back();
+        }
+        _loadingDialogOpen = false;
+        break;
+      } catch (e) {
+        debugPrint('Error force closing loading: $e');
+        attempts++;
+        if (attempts < 5) {
+          Future.delayed(const Duration(milliseconds: 50));
+        }
+      }
+    }
+    _loadingDialogOpen = false;
   }
   
   /// Hide loading dialog
   void hideLoading() {
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
+    _forceCloseLoading();
   }
   
   /// Show success snackbar

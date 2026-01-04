@@ -64,6 +64,13 @@ class FilterDepartmentDialog extends StatelessWidget {
                         Get.back();
                       },
                     ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                      onPressed: () {
+                        controller.showDeleteDepartmentConfirmation(dept);
+                      },
+                      tooltip: 'Xóa phòng ban',
+                    ),
                     onTap: () {
                       controller.filterByDepartment(dept.id);
                       Get.back();

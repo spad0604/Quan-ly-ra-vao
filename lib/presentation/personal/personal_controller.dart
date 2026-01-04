@@ -29,6 +29,10 @@ class PersonalController extends BaseController{
 
   final TextEditingController phoneNumberController = TextEditingController();
 
+  final TextEditingController officerNumberController = TextEditingController();
+
+  final TextEditingController rankController = TextEditingController();
+
   RxString departmentId = ''.obs;
 
   // IMPORTANT: don't keep a potentially-stale reference if GetX recreates controllers.
@@ -40,6 +44,8 @@ class PersonalController extends BaseController{
 
   RxString sex = ''.obs;
 
+  RxString imageUrl = ''.obs; // Relative path to image stored in AppData
+
   @override
   void onInit() {
     super.onInit();
@@ -47,8 +53,11 @@ class PersonalController extends BaseController{
   }
 
   void showAddPersonalPopup() {
+    // Refresh departments before showing popup
+    getDepartments();
     showDialog(
       context: Get.context!,
+      barrierDismissible: true,
       builder: (context) => const AddPersonalPopup(),
     );
   }
@@ -128,32 +137,45 @@ class PersonalController extends BaseController{
   Future<void> addPersonal() async {
     try {
       showLoading(message: 'Đang thêm cán bộ...');
+      
       final MemberTableCompanion member = MemberTableCompanion(
         id: Value(Uuid().v4()),
         name: Value(nameController.text.trim()),
         phoneNumber: Value(phoneNumberController.text.trim()),
         identityNumber: Value(authenticationService.encodeIndentityNumber(idController.text.trim())),
-        imageUrl: Value(''),
+        imageUrl: Value(imageUrl.value),
         address: Value(addressController.text.trim()),
         dateOfBirth: Value(dateOfBirthController.text.trim()),
         departmentId: Value(departmentId.value),
         position: Value(positionController.text.trim()),
         sex: Value(sex.value),
+        officerNumber: Value(officerNumberController.text.trim()),
+        rank: Value(rankController.text.trim()),
       );
 
       await AppDatabase.instance.createMemeber(member);
+      
+      // Hide loading FIRST before closing popup
       hideLoading();
+      
+      // Wait a bit to ensure loading is closed
+      await Future.delayed(const Duration(milliseconds: 200));
       
       // Clear form
       _clearForm();
-      // Close popup first, then show success message
-      Get.back();
+      
+      // Close popup (AddPersonalPopup dialog)
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+      
       // Show success and refresh after popup is closed
       Future.microtask(() {
         showSuccess('Thêm cán bộ thành công!');
         _refreshStaffController();
       });
     } catch (e) {
+      // Ensure loading is hidden on error
       hideLoading();
       showError('Lỗi khi thêm cán bộ: $e');
     }
@@ -166,8 +188,25 @@ class PersonalController extends BaseController{
     dateOfBirthController.clear();
     positionController.clear();
     phoneNumberController.clear();
+    officerNumberController.clear();
+    rankController.clear();
     departmentId.value = '';
     sex.value = '';
+    imageUrl.value = '';
+  }
+
+  /// Check if all required fields are filled (except avatar)
+  bool get isFormValid {
+    return nameController.text.trim().isNotEmpty &&
+        idController.text.trim().isNotEmpty &&
+        addressController.text.trim().isNotEmpty &&
+        dateOfBirthController.text.trim().isNotEmpty &&
+        sex.value.isNotEmpty &&
+        departmentId.value.isNotEmpty &&
+        positionController.text.trim().isNotEmpty &&
+        officerNumberController.text.trim().isNotEmpty &&
+        rankController.text.trim().isNotEmpty &&
+        phoneNumberController.text.trim().isNotEmpty;
   }
   
   void _refreshStaffController() {
@@ -176,7 +215,7 @@ class PersonalController extends BaseController{
       // For now, we'll use Get.find to refresh StaffController
       if (Get.isRegistered<StaffController>()) {
         final staffController = Get.find<StaffController>();
-        staffController.getMembers();
+        staffController.getMembers(showLoading: false); // Don't show loading when refreshing
       }
       // Also refresh dashboard
       if (Get.isRegistered<DashboardController>()) {

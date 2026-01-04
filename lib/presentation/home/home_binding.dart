@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:quanly/presentation/home/controllers/dashboard_controller.dart';
+import 'package:quanly/presentation/home/controllers/admin_controller.dart';
 import 'package:quanly/presentation/home/controllers/guest_controller.dart';
 import 'package:quanly/presentation/home/controllers/history_controller.dart';
 import 'package:quanly/presentation/home/controllers/staff_controller.dart';
@@ -10,11 +11,15 @@ import '../../data/repositories/user_repository_impl.dart';
 import '../../domain/usecases/get_users_usecase.dart';
 import 'home_controller.dart';
 import '../../core/qr_reader/qr_reader_controller.dart';
+import '../../core/services/auth_service.dart';
 
 /// Binding để inject dependencies cho HomeController
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
+    // Inject AuthService (singleton)
+    Get.put(AuthService(), permanent: true);
+    
     // Inject DioClient (singleton)
     Get.lazyPut(() => DioClient(), fenix: true);
     
@@ -36,5 +41,6 @@ class HomeBinding extends Bindings {
     Get.lazyPut(() => StaffController());
     Get.lazyPut(() => GuestController());
     Get.lazyPut(() => HistoryController());
+    Get.lazyPut(() => AdminController());
   }
 }

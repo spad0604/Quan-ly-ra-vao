@@ -23,6 +23,64 @@ class GuestTab extends GetView<GuestController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // COM Port Selection
+                  Obx(() {
+                    final qrReaderController = controller.qrReaderController;
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.usb, color: AppColors.blueDark),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Cổng COM:',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: DropdownButton<String>(
+                                value: qrReaderController.selectedPort.value,
+                                isExpanded: true,
+                                underline: const SizedBox(),
+                                hint: const Text('Chọn cổng COM'),
+                                items: qrReaderController.availablePorts.map((port) {
+                                  return DropdownMenuItem<String>(
+                                    value: port,
+                                    child: Text(port),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newPort) {
+                                  if (newPort != null) {
+                                    qrReaderController.selectPort(newPort);
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: () => qrReaderController.fetchPorts(),
+                            tooltip: 'Làm mới danh sách cổng',
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 24),
+                  
                   // Scan Button Area
                   Center(
                     child: Column(

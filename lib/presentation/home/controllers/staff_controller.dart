@@ -9,7 +9,9 @@ import 'package:quanly/presentation/home/widgets/add_department_popup.dart';
 import 'package:quanly/presentation/home/widgets/delete_confirmation_dialog.dart';
 import 'package:quanly/presentation/home/widgets/edit_member_popup.dart';
 import 'package:quanly/presentation/home/widgets/qr_code_dialog.dart';
+import 'package:quanly/presentation/home/widgets/member_detail_dialog.dart';
 import 'package:quanly/presentation/personal/personal_controller.dart';
+import 'package:quanly/core/services/excel_export_service.dart';
 import 'dashboard_controller.dart';
 import 'history_controller.dart';
 
@@ -32,6 +34,7 @@ class StaffController extends BaseController {
 
   final _db = AppDatabase.instance;
   final _authenticationService = AuthenticationService();
+  final _excelExportService = ExcelExportService();
 
   @override
   void onInit() {
@@ -70,10 +73,11 @@ class StaffController extends BaseController {
     }
   }
 
-  Future<void> getMembers({bool showLoading = true}) async {
+  Future<void> getMembers({bool showLoading = false}) async {
     try {
+      // Use isLoading state instead of dialog
       if (showLoading) {
-        this.showLoading();
+        isLoading = true;
       }
 
       final searchQuery = searchController.text.trim().isEmpty
@@ -114,15 +118,19 @@ class StaffController extends BaseController {
 
       members.value = lastestList;
 
-      // Update stats (get all members for stats)
-      await _updateStats();
+      // Update stats (get all members for stats) - don't block on this
+      _updateStats().catchError((e) {
+        // Ignore stats error
+        print('Error updating stats: $e');
+      });
 
+      // Hide loading
       if (showLoading) {
-        hideLoading();
+        isLoading = false;
       }
     } catch (e) {
       if (showLoading) {
-        hideLoading();
+        isLoading = false;
       }
       // Delay error show to avoid calling during build
       Future.microtask(() {
@@ -207,7 +215,16 @@ class StaffController extends BaseController {
     try {
       await _db.createDepartment(name);
       showSuccess('Thêm phòng ban thành công');
-      getDepartments(); // Refresh department list
+      getDepartments(); // Refresh department list in StaffController
+      
+      // Also refresh departments in PersonalController if it exists
+      if (Get.isRegistered<PersonalController>()) {
+        try {
+          Get.find<PersonalController>().getDepartments();
+        } catch (_) {
+          // PersonalController not found, ignore
+        }
+      }
     } catch (e) {
       showError('Lỗi khi thêm phòng ban: ${e.toString()}');
     }
@@ -227,6 +244,8 @@ class StaffController extends BaseController {
     String phoneNumber,
     String departmentId,
     String sex,
+    String? officerNumber,
+    String? rank,
   ) async {
     try {
       final member = MemberTableCompanion(
@@ -240,6 +259,8 @@ class StaffController extends BaseController {
         phoneNumber: Value(phoneNumber),
         departmentId: Value(departmentId),
         sex: Value(sex),
+        officerNumber: Value(officerNumber ?? ''),
+        rank: Value(rank ?? ''),
       );
 
       await _db.updateMember(memberId, member);
@@ -297,6 +318,97 @@ class StaffController extends BaseController {
 
   void showQRCode(MemberTableData member) {
     Get.dialog(QRCodeDialog(member: member), barrierDismissible: true);
+  }
+
+  Future<void> exportStaffListToExcel() async {
+    try {
+      showLoading(message: 'Đang xuất Excel...');
+      
+      // Get all members (not just current page)
+      final allMembers = await _db.getAllMember(1, 10000);
+      
+      // Map department IDs to names
+      final membersWithDept = <MemberTableData>[];
+      for (var member in allMembers) {
+        try {
+          String departmentName = '';
+          if (member.departmentId.isNotEmpty) {
+            final department = await _db.getDepartmentById(member.departmentId);
+            departmentName = department?.name ?? '';
+          }
+          membersWithDept.add(member.copyWith(departmentId: departmentName));
+        } catch (e) {
+          membersWithDept.add(member.copyWith(departmentId: ''));
+        }
+      }
+
+      final filePath = await _excelExportService.exportStaffList(membersWithDept);
+      hideLoading();
+
+      if (filePath != null) {
+        showSuccess('Xuất Excel thành công!\nFile: $filePath');
+      } else {
+        showError('Lỗi khi xuất Excel');
+      }
+    } catch (e) {
+      hideLoading();
+      showError('Lỗi khi xuất Excel: $e');
+    }
+  }
+
+  void viewMemberDetails(MemberTableData member) {
+    Get.dialog(MemberDetailDialog(member: member), barrierDismissible: true);
+  }
+
+  Future<void> showDeleteDepartmentConfirmation(DepartmentTableData department) async {
+    // Check if department has members
+    final members = await _db.searchMembers(
+      page: 1,
+      pageSize: 1,
+      searchQuery: null,
+      departmentId: department.id,
+    );
+    
+    if (members.isNotEmpty) {
+      showError('Không thể xóa phòng ban này vì còn cán bộ trong phòng ban');
+      return;
+    }
+
+    final confirmed = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Xác nhận xóa'),
+        content: Text('Bạn có chắc chắn muốn xóa phòng ban "${department.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Get.back(result: true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('Xóa'),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+    
+    if (confirmed == true) {
+      await deleteDepartment(department.id);
+    }
+  }
+
+  Future<void> deleteDepartment(String departmentId) async {
+    try {
+      await _db.deleteDepartment(departmentId);
+      showSuccess('Xóa phòng ban thành công');
+      getDepartments(); // Refresh department list
+      getMembers(); // Refresh member list
+    } catch (e) {
+      showError('Lỗi khi xóa phòng ban: ${e.toString()}');
+    }
   }
 
   @override

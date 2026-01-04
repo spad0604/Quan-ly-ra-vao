@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:quanly/app/database/app_database.dart';
+import 'package:quanly/core/services/excel_export_service.dart';
+import 'package:quanly/core/authentication/authentication_service.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:intl/intl.dart';
 
@@ -33,7 +35,8 @@ class HistoryController extends GetxController {
   // Filters
   final selectedFilter = 0.obs; // 0: Staff, 1: Guest
   final searchController = TextEditingController();
-  final selectedDate = DateTime.now().obs;
+  final startDate = DateTime.now().obs;
+  final endDate = DateTime.now().obs;
   final selectedStatus = 0.obs; // 0: All, 1: In building, 2: Left
   
   // Data
@@ -43,12 +46,16 @@ class HistoryController extends GetxController {
   Timer? _debounceTimer;
 
   final _db = AppDatabase.instance;
+  final _excelExportService = ExcelExportService();
+  final _authenticationService = AuthenticationService();
 
   @override
   void onInit() {
     super.onInit();
     // Default to today
-    selectedDate.value = DateTime.now();
+    final now = DateTime.now();
+    startDate.value = now;
+    endDate.value = now;
     fetchHistory();
     
     // Debounce search
@@ -67,10 +74,24 @@ class HistoryController extends GetxController {
     super.onClose();
   }
   
-  String get formattedDate => DateFormat('dd/MM/yyyy').format(selectedDate.value);
+  String get formattedStartDate => DateFormat('dd/MM/yyyy').format(startDate.value);
+  String get formattedEndDate => DateFormat('dd/MM/yyyy').format(endDate.value);
   
-  void selectDate(DateTime date) {
-    selectedDate.value = date;
+  void selectStartDate(DateTime date) {
+    startDate.value = date;
+    // Ensure endDate is not before startDate
+    if (endDate.value.isBefore(date)) {
+      endDate.value = date;
+    }
+    fetchHistory();
+  }
+  
+  void selectEndDate(DateTime date) {
+    endDate.value = date;
+    // Ensure startDate is not after endDate
+    if (startDate.value.isAfter(date)) {
+      startDate.value = date;
+    }
     fetchHistory();
   }
   
@@ -106,21 +127,25 @@ class HistoryController extends GetxController {
       // Note: role is stored as string in DB based on our previous insert logic
       final roleFilter = isStaff ? 'member' : 'anonymus';
       
-      // Build date filter - filter by date only (ignore time)
-      final selectedDateValue = selectedDate.value;
+      // Build date range filter - filter by date range (ignore time)
+      final start = DateTime(startDate.value.year, startDate.value.month, startDate.value.day);
+      final end = DateTime(endDate.value.year, endDate.value.month, endDate.value.day, 23, 59, 59);
       
+      // Get all logs for the role first, then filter by date range in memory
+      // This is simpler than trying to do complex date range queries in Drift
       var query = _db.select(_db.timeManagementTable)
-        ..where((tbl) => 
-          tbl.role.equals(roleFilter) &
-          tbl.checkInTime.year.equals(selectedDateValue.year) &
-          tbl.checkInTime.month.equals(selectedDateValue.month) &
-          tbl.checkInTime.day.equals(selectedDateValue.day)
-        )
+        ..where((tbl) => tbl.role.equals(roleFilter))
         ..orderBy([(t) => drift.OrderingTerm(expression: t.checkInTime, mode: drift.OrderingMode.desc)]);
       
-      final timeLogs = await query.get();
-
-      for (var log in timeLogs) {
+      final allTimeLogs = await query.get();
+      
+      // Filter by date range
+      final filteredTimeLogs = allTimeLogs.where((log) {
+        final logDate = log.checkInTime;
+        return !logDate.isBefore(start) && !logDate.isAfter(end);
+      }).toList();
+      
+      for (var log in filteredTimeLogs) {
         String name = 'Unknown';
         String code = '---';
         String dept = '---';
@@ -190,6 +215,66 @@ class HistoryController extends GetxController {
       print('Error fetching history: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> exportHistoryToExcel() async {
+    try {
+      isLoading.value = true;
+      
+      // Prepare data for export
+      final exportData = <Map<String, dynamic>>[];
+      final isStaff = selectedFilter.value == 0;
+      
+      for (var item in historyList) {
+        // Decode identity number
+        String identityNumber = item.memberCode;
+        try {
+          identityNumber = _authenticationService.decodeIndentityNumber(item.memberCode);
+        } catch (e) {
+          // Already decoded or not encrypted
+        }
+
+        final data = {
+          'name': item.name,
+          'identity_number': identityNumber,
+          'check_in_time': item.checkInTime.millisecondsSinceEpoch ~/ 1000,
+          'check_out_time': item.checkOutTime != null ? item.checkOutTime!.millisecondsSinceEpoch ~/ 1000 : null,
+          'reason': isStaff ? null : item.department,
+        };
+        exportData.add(data);
+      }
+
+      final filePath = await _excelExportService.exportHistory(exportData, isStaff: isStaff);
+      isLoading.value = false;
+
+      if (filePath != null) {
+        Get.snackbar(
+          'Thành công',
+          'Xuất Excel thành công!\nFile: $filePath',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 4),
+        );
+      } else {
+        Get.snackbar(
+          'Lỗi',
+          'Lỗi khi xuất Excel',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar(
+        'Lỗi',
+        'Lỗi khi xuất Excel: $e',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }

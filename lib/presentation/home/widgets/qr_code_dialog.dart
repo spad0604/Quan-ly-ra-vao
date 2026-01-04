@@ -3,16 +3,66 @@ import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:quanly/app/database/app_database.dart';
 import 'package:quanly/core/values/app_colors.dart';
+import 'package:quanly/core/services/print_service.dart';
+import 'package:quanly/core/widgets/member_avatar.dart';
 
-class QRCodeDialog extends StatelessWidget {
+class QRCodeDialog extends StatefulWidget {
   final MemberTableData member;
 
   const QRCodeDialog({super.key, required this.member});
 
   @override
+  State<QRCodeDialog> createState() => _QRCodeDialogState();
+}
+
+class _QRCodeDialogState extends State<QRCodeDialog> {
+  final _printService = PrintService();
+  bool _isPrinting = false;
+
+  Future<void> _handlePrint() async {
+    setState(() {
+      _isPrinting = true;
+    });
+
+    try {
+      await _printService.printStaffQR(
+        memberName: widget.member.name,
+        position: widget.member.position.isNotEmpty ? widget.member.position : '',
+        qrData: widget.member.id,
+        memberId: widget.member.id,
+      );
+      if (mounted) {
+        Get.snackbar(
+          'Thành công',
+          'Đã gửi lệnh in QR code',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Get.snackbar(
+          'Lỗi',
+          'Không thể in QR code: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPrinting = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     // QR code data - using member ID
-    final qrData = member.id;
+    final qrData = widget.member.id;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -56,14 +106,14 @@ class QRCodeDialog extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const CircleAvatar(
+                  MemberAvatar(
+                    imageUrl: widget.member.imageUrl,
+                    name: widget.member.name,
                     radius: 40,
-                    backgroundColor: Colors.grey,
-                    child: Icon(Icons.person, size: 40, color: Colors.white),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    member.name,
+                    widget.member.name,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -71,7 +121,7 @@ class QRCodeDialog extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    member.position.isNotEmpty ? member.position : 'Chức vụ',
+                    widget.member.position.isNotEmpty ? widget.member.position : 'Chức vụ',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey.shade600,
@@ -101,7 +151,7 @@ class QRCodeDialog extends StatelessWidget {
         
             // Member ID
             Text(
-              'ID: ${member.id}',
+              'ID: ${widget.member.id}',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey.shade600,
@@ -109,27 +159,51 @@ class QRCodeDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-        
-            // Close Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.blueDark,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isPrinting ? null : _handlePrint,
+                    icon: _isPrinting
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.print),
+                    label: Text(_isPrinting ? 'Đang in...' : 'In QR Code'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      side: BorderSide(color: AppColors.blueDark),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Đóng',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Get.back(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.blueDark,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Đóng',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

@@ -6,11 +6,12 @@ import 'package:quanly/presentation/home/navigator_bar.dart';
 import 'package:quanly/presentation/home/widgets/filter_department_dialog.dart';
 import 'package:quanly/presentation/home/widgets/home_header.dart';
 import 'package:quanly/presentation/home/widgets/stat_card.dart';
-import 'package:quanly/presentation/personal/personal_controller.dart';
 import 'package:quanly/presentation/home/controllers/dashboard_controller.dart';
+import 'package:quanly/presentation/home/controllers/admin_controller.dart';
 import 'package:quanly/presentation/home/controllers/staff_controller.dart';
 import 'package:quanly/presentation/home/controllers/history_controller.dart';
 import 'package:quanly/presentation/home/controllers/guest_controller.dart';
+import 'package:quanly/core/widgets/member_avatar.dart';
 import 'package:intl/intl.dart';
 import '../../core/base/base_view.dart';
 import 'home_controller.dart';
@@ -20,6 +21,7 @@ part 'tabs/dashboard_tab.dart';
 part 'tabs/staff_tab.dart';
 part 'tabs/history_tab.dart';
 part 'tabs/guest_tab.dart';
+part 'tabs/admin_tab.dart';
 
 class HomeView extends BaseView<HomeController> {
   const HomeView({super.key});
@@ -42,6 +44,7 @@ class HomeView extends BaseView<HomeController> {
                     StaffTab(),     // Index 1
                     GuestTab(),     // Index 2 - Guest QR Reader
                     HistoryTab(),   // Index 3
+                    AdminTab(),     // Index 4
                   ],
                 )),
               ),

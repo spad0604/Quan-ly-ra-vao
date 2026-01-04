@@ -136,7 +136,7 @@ class StaffTab extends GetView<StaffController> {
               ),
               const SizedBox(width: 16),
               OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () => controller.exportStaffListToExcel(),
                 icon: const Icon(Icons.download, size: 16, color: AppColors.blueDark),
                 label: const Text('Xuất Excel', style: TextStyle(fontWeight: FontWeight.w500, color: AppColors.blueDark)),
                 style: OutlinedButton.styleFrom(
@@ -203,11 +203,10 @@ class StaffTab extends GetView<StaffController> {
                       flex: 3,
                       child: Row(
                         children: [
-                          const CircleAvatar(
+                          MemberAvatar(
+                            imageUrl: member.imageUrl,
+                            name: member.name,
                             radius: 20,
-                            backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=1'), 
-                            // In real app, handle image load error
-                            backgroundColor: Colors.grey,
                           ),
                           const SizedBox(width: 12),
                           Column(
@@ -241,6 +240,11 @@ class StaffTab extends GetView<StaffController> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                          IconButton(
+                            icon: const Icon(Icons.visibility, color: AppColors.blueDark),
+                            onPressed: () => controller.viewMemberDetails(member),
+                            tooltip: 'Xem thông tin',
+                          ),
                           IconButton(
                             icon: const Icon(Icons.qr_code, color: Colors.green),
                             onPressed: () => controller.showQRCode(member),

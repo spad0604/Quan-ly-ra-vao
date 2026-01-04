@@ -51,6 +51,88 @@ class ScanCccdSection extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            // COM Port Selection
+            Obx(() {
+              final personalController = Get.find<PersonalController>();
+              final qrReaderController = personalController.qrReaderController;
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.usb, color: AppColors.blueDark, size: 20),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'COM:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: DropdownButton<String>(
+                          value: qrReaderController.selectedPort.value,
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          hint: const Text(
+                            'Chọn COM',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                          dropdownColor: Colors.white,
+                          iconEnabledColor: Colors.black87,
+                          items: qrReaderController.availablePorts.map((port) {
+                            return DropdownMenuItem<String>(
+                              value: port,
+                              child: Text(
+                                port,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? newPort) {
+                            if (newPort != null) {
+                              qrReaderController.selectPort(newPort);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.refresh, size: 18),
+                      onPressed: () => qrReaderController.fetchPorts(),
+                      tooltip: 'Làm mới',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () => Get.find<PersonalController>().scanQrCode(),
               icon: const Icon(Icons.center_focus_strong),

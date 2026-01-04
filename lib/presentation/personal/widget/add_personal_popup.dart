@@ -1,9 +1,11 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quanly/core/values/app_colors.dart';
 import 'package:quanly/presentation/personal/personal_controller.dart';
+import 'package:quanly/core/services/image_storage_service.dart';
 
 part 'scan_cccd_section.dart';
 part 'personal_form_field.dart';
@@ -18,6 +20,45 @@ class AddPersonalPopup extends StatefulWidget {
 
 class _AddPersonalPopupState extends State<AddPersonalPopup> {
   final personalController = Get.find<PersonalController>();
+  
+  @override
+  void initState() {
+    super.initState();
+    // Add listeners to all text controllers to trigger validation
+    personalController.nameController.addListener(_onFieldChanged);
+    personalController.idController.addListener(_onFieldChanged);
+    personalController.addressController.addListener(_onFieldChanged);
+    personalController.dateOfBirthController.addListener(_onFieldChanged);
+    personalController.positionController.addListener(_onFieldChanged);
+    personalController.phoneNumberController.addListener(_onFieldChanged);
+    personalController.officerNumberController.addListener(_onFieldChanged);
+    personalController.rankController.addListener(_onFieldChanged);
+    
+    // Listen to RxString changes
+    ever(personalController.sex, (_) => _onFieldChanged());
+    ever(personalController.departmentId, (_) => _onFieldChanged());
+  }
+  
+  @override
+  void dispose() {
+    // Remove listeners
+    personalController.nameController.removeListener(_onFieldChanged);
+    personalController.idController.removeListener(_onFieldChanged);
+    personalController.addressController.removeListener(_onFieldChanged);
+    personalController.dateOfBirthController.removeListener(_onFieldChanged);
+    personalController.positionController.removeListener(_onFieldChanged);
+    personalController.phoneNumberController.removeListener(_onFieldChanged);
+    personalController.officerNumberController.removeListener(_onFieldChanged);
+    personalController.rankController.removeListener(_onFieldChanged);
+    super.dispose();
+  }
+  
+  void _onFieldChanged() {
+    setState(() {
+      // Trigger rebuild to update button state
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -210,6 +251,26 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PersonalTextField(
+                            controller: personalController.officerNumberController,
+                            label: 'Số hiệu sĩ quan',
+                            hintText: 'Nhập số hiệu sĩ quan',
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: PersonalTextField(
+                            controller: personalController.rankController,
+                            label: 'Cấp bậc',
+                            hintText: 'Ví dụ: Thượng úy',
+                          ),
+                        ),
+                      ],
+                    ),
 
                     const SizedBox(height: 24),
 
@@ -251,27 +312,36 @@ class _AddPersonalPopupState extends State<AddPersonalPopup> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: () {
-                      personalController.addPersonal();
+                  Builder(
+                    builder: (context) {
+                      final isValid = personalController.isFormValid;
+                      return ElevatedButton(
+                        onPressed: isValid
+                            ? () {
+                                personalController.addPersonal();
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isValid
+                              ? AppColors.blueDark
+                              : Colors.grey.shade400,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Lưu thông tin',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.blueDark,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Lưu thông tin',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ),
                 ],
               ),

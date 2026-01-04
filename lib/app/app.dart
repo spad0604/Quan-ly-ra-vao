@@ -29,7 +29,7 @@ class App extends StatelessWidget {
       ),
       
       // Routing
-      initialRoute: AppRoutes.HOME,
+      initialRoute: AppRoutes.LOGIN,
       getPages: AppPages.routes,
       
       // Default transition

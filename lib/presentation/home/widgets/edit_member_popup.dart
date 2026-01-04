@@ -25,6 +25,8 @@ class _EditMemberPopupState extends State<EditMemberPopup> {
   final dateOfBirthController = TextEditingController();
   final positionController = TextEditingController();
   final phoneNumberController = TextEditingController();
+  final officerNumberController = TextEditingController();
+  final rankController = TextEditingController();
 
   String selectedDepartmentId = '';
   String selectedSex = '';
@@ -50,6 +52,8 @@ class _EditMemberPopupState extends State<EditMemberPopup> {
       dateOfBirthController.text = originalMember.dateOfBirth;
       positionController.text = originalMember.position;
       phoneNumberController.text = originalMember.phoneNumber;
+      officerNumberController.text = originalMember.officerNumber;
+      rankController.text = originalMember.rank;
       selectedDepartmentId = originalMember.departmentId;
       selectedSex = originalMember.sex;
       setState(() {});
@@ -64,6 +68,8 @@ class _EditMemberPopupState extends State<EditMemberPopup> {
     dateOfBirthController.dispose();
     positionController.dispose();
     phoneNumberController.dispose();
+    officerNumberController.dispose();
+    rankController.dispose();
     super.dispose();
   }
 
@@ -226,6 +232,27 @@ class _EditMemberPopupState extends State<EditMemberPopup> {
                       ),
                     ),
 
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PersonalTextField(
+                            controller: officerNumberController,
+                            label: 'Số hiệu sĩ quan',
+                            hintText: 'Nhập số hiệu sĩ quan',
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: PersonalTextField(
+                            controller: rankController,
+                            label: 'Cấp bậc',
+                            hintText: 'Ví dụ: Thượng úy',
+                          ),
+                        ),
+                      ],
+                    ),
+
                     const SizedBox(height: 24),
 
                     PersonalTextField(
@@ -275,6 +302,8 @@ class _EditMemberPopupState extends State<EditMemberPopup> {
                         phoneNumberController.text.trim(),
                         selectedDepartmentId,
                         selectedSex,
+                        officerNumberController.text.trim(),
+                        rankController.text.trim(),
                       );
                     },
                     style: ElevatedButton.styleFrom(

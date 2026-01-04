@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quanly/core/values/app_colors.dart';
 import 'package:quanly/core/services/locale_service.dart';
+import 'package:quanly/core/services/auth_service.dart';
+import 'package:quanly/presentation/home/home_controller.dart';
+import 'package:quanly/presentation/home/controllers/staff_controller.dart';
+import 'package:quanly/presentation/home/controllers/history_controller.dart';
 
 class HomeHeader extends StatelessWidget {
   final String title;
@@ -43,21 +47,54 @@ class HomeHeader extends StatelessWidget {
           ),
           const SizedBox(width: 48),
           Expanded(
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'header_search_placeholder'.tr,
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                ),
-              ),
-            ),
+            child: Obx(() {
+              final homeController = Get.find<HomeController>();
+              final currentIndex = homeController.selectedIndex.value;
+              
+              // Only show search for Staff (1) and History (3) tabs
+              if (currentIndex == 1) {
+                // Staff tab
+                final staffController = Get.find<StaffController>();
+                return Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextField(
+                    controller: staffController.searchController,
+                    decoration: InputDecoration(
+                      hintText: 'header_search_placeholder'.tr,
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
+                );
+              } else if (currentIndex == 3) {
+                // History tab
+                final historyController = Get.find<HistoryController>();
+                return Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextField(
+                    controller: historyController.searchController,
+                    decoration: InputDecoration(
+                      hintText: 'header_search_placeholder'.tr,
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                  ),
+                );
+              } else {
+                // Other tabs - no search
+                return const SizedBox.shrink();
+              }
+            }),
           ),
           const SizedBox(width: 24),
           PopupMenuButton<Locale>(
@@ -97,41 +134,48 @@ class HomeHeader extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none),
-          ),
           const SizedBox(width: 16),
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: const [
-                  Text(
-                    'Nguyễn Văn A',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+          Obx(() {
+            final authService = Get.find<AuthService>();
+            final adminName = authService.adminName;
+            final displayName = adminName.isNotEmpty ? adminName : 'admin';
+            final firstLetter = displayName.isNotEmpty 
+                ? displayName[0].toUpperCase() 
+                : 'A';
+            
+            return Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      displayName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Quản trị viên',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey,
+                    const Text(
+                      'Quản trị viên',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey,
+                      ),
                     ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: AppColors.blueDark,
+                  child: Text(
+                    firstLetter,
+                    style: const TextStyle(color: Colors.white),
                   ),
-                ],
-              ),
-              const SizedBox(width: 12),
-              const CircleAvatar(
-                radius: 18,
-                backgroundColor: AppColors.blueDark,
-                child: Text('A', style: TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );

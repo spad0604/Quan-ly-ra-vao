@@ -1,8 +1,20 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
 
 class AuthenticationService {
+  /// Hash password using SHA-256 with a compile-time secret salt.
+  /// This is one-way (cannot be decrypted).
+  String hashPassword(String plain) {
+    final secretKey = String.fromEnvironment(
+      'PASSWORD_SECRET',
+      defaultValue: 'default_secret',
+    );
+    final bytes = utf8.encode('$secretKey::$plain');
+    return sha256.convert(bytes).toString(); // 64 hex chars
+  }
+
   String encodePassword(String plain) {
     final secretKey = String.fromEnvironment('PASSWORD_SECRET', defaultValue: 'default_secret');
     final key = _deriveKeyFromSecret(secretKey);

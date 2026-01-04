@@ -47,11 +47,15 @@ dependencies:
   dotenv: ^4.2.0
   flutter_dotenv: ^6.0.0
   encrypt: ^5.0.1
+  crypto: ^3.0.3
   flutter_libserialport: ^0.6.0
   excel: ^4.0.6
   intl: ^0.20.2
   qr_flutter: ^4.1.0
   flutter_launcher_icons: ^0.14.4
+  printing: ^5.14.2
+  pdf: ^3.11.1
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

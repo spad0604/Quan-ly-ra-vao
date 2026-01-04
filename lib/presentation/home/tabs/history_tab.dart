@@ -72,17 +72,18 @@ class HistoryTab extends GetView<HistoryController> {
                         ),
                       ),
                       const SizedBox(width: 16),
+                      // Start Date
                       Expanded(
                         child: InkWell(
                           onTap: () async {
                             final picked = await showDatePicker(
                               context: context,
-                              initialDate: controller.selectedDate.value,
+                              initialDate: controller.startDate.value,
                               firstDate: DateTime(2020),
-                              lastDate: DateTime.now(),
+                              lastDate: controller.endDate.value,
                             );
                             if (picked != null) {
-                              controller.selectDate(picked);
+                              controller.selectStartDate(picked);
                             }
                           },
                           child: Container(
@@ -95,7 +96,67 @@ class HistoryTab extends GetView<HistoryController> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Obx(() => Text(controller.formattedDate)),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Từ ngày',
+                                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                                    ),
+                                    Obx(() => Text(
+                                      controller.formattedStartDate,
+                                      style: const TextStyle(fontSize: 12),
+                                    )),
+                                  ],
+                                ),
+                                const Icon(Icons.calendar_today, size: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('→', style: TextStyle(color: Colors.grey)),
+                      const SizedBox(width: 8),
+                      // End Date
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            final picked = await showDatePicker(
+                              context: context,
+                              initialDate: controller.endDate.value,
+                              firstDate: controller.startDate.value,
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null) {
+                              controller.selectEndDate(picked);
+                            }
+                          },
+                          child: Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Đến ngày',
+                                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                                    ),
+                                    Obx(() => Text(
+                                      controller.formattedEndDate,
+                                      style: const TextStyle(fontSize: 12),
+                                    )),
+                                  ],
+                                ),
                                 const Icon(Icons.calendar_today, size: 16),
                               ],
                             ),
@@ -179,9 +240,21 @@ class HistoryTab extends GetView<HistoryController> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
-                            Icons.filter_list,
+                            Icons.refresh,
                             color: Colors.white,
                           ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      OutlinedButton.icon(
+                        onPressed: () => controller.exportHistoryToExcel(),
+                        icon: const Icon(Icons.download, size: 16, color: AppColors.blueDark),
+                        label: const Text('Xuất Excel', style: TextStyle(fontWeight: FontWeight.w500, color: AppColors.blueDark)),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: AppColors.blueDark,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         ),
                       ),
                     ],

@@ -635,6 +635,36 @@ class $MemberTableTable extends MemberTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _officerNumberMeta = const VerificationMeta(
+    'officerNumber',
+  );
+  @override
+  late final GeneratedColumn<String> officerNumber = GeneratedColumn<String>(
+    'officer_number',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _rankMeta = const VerificationMeta('rank');
+  @override
+  late final GeneratedColumn<String> rank = GeneratedColumn<String>(
+    'rank',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 0,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -647,6 +677,8 @@ class $MemberTableTable extends MemberTable
     departmentId,
     position,
     sex,
+    officerNumber,
+    rank,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -749,6 +781,21 @@ class $MemberTableTable extends MemberTable
     } else if (isInserting) {
       context.missing(_sexMeta);
     }
+    if (data.containsKey('officer_number')) {
+      context.handle(
+        _officerNumberMeta,
+        officerNumber.isAcceptableOrUnknown(
+          data['officer_number']!,
+          _officerNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('rank')) {
+      context.handle(
+        _rankMeta,
+        rank.isAcceptableOrUnknown(data['rank']!, _rankMeta),
+      );
+    }
     return context;
   }
 
@@ -798,6 +845,14 @@ class $MemberTableTable extends MemberTable
         DriftSqlType.string,
         data['${effectivePrefix}sex'],
       )!,
+      officerNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}officer_number'],
+      )!,
+      rank: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rank'],
+      )!,
     );
   }
 
@@ -818,6 +873,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
   final String departmentId;
   final String position;
   final String sex;
+  final String officerNumber;
+  final String rank;
   const MemberTableData({
     required this.id,
     required this.name,
@@ -829,6 +886,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     required this.departmentId,
     required this.position,
     required this.sex,
+    required this.officerNumber,
+    required this.rank,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -843,6 +902,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     map['department_id'] = Variable<String>(departmentId);
     map['position'] = Variable<String>(position);
     map['sex'] = Variable<String>(sex);
+    map['officer_number'] = Variable<String>(officerNumber);
+    map['rank'] = Variable<String>(rank);
     return map;
   }
 
@@ -858,6 +919,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
       departmentId: Value(departmentId),
       position: Value(position),
       sex: Value(sex),
+      officerNumber: Value(officerNumber),
+      rank: Value(rank),
     );
   }
 
@@ -877,6 +940,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
       departmentId: serializer.fromJson<String>(json['departmentId']),
       position: serializer.fromJson<String>(json['position']),
       sex: serializer.fromJson<String>(json['sex']),
+      officerNumber: serializer.fromJson<String>(json['officerNumber']),
+      rank: serializer.fromJson<String>(json['rank']),
     );
   }
   @override
@@ -893,6 +958,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
       'departmentId': serializer.toJson<String>(departmentId),
       'position': serializer.toJson<String>(position),
       'sex': serializer.toJson<String>(sex),
+      'officerNumber': serializer.toJson<String>(officerNumber),
+      'rank': serializer.toJson<String>(rank),
     };
   }
 
@@ -907,6 +974,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     String? departmentId,
     String? position,
     String? sex,
+    String? officerNumber,
+    String? rank,
   }) => MemberTableData(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -918,6 +987,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     departmentId: departmentId ?? this.departmentId,
     position: position ?? this.position,
     sex: sex ?? this.sex,
+    officerNumber: officerNumber ?? this.officerNumber,
+    rank: rank ?? this.rank,
   );
   MemberTableData copyWithCompanion(MemberTableCompanion data) {
     return MemberTableData(
@@ -939,6 +1010,10 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
           : this.departmentId,
       position: data.position.present ? data.position.value : this.position,
       sex: data.sex.present ? data.sex.value : this.sex,
+      officerNumber: data.officerNumber.present
+          ? data.officerNumber.value
+          : this.officerNumber,
+      rank: data.rank.present ? data.rank.value : this.rank,
     );
   }
 
@@ -954,7 +1029,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
           ..write('dateOfBirth: $dateOfBirth, ')
           ..write('departmentId: $departmentId, ')
           ..write('position: $position, ')
-          ..write('sex: $sex')
+          ..write('sex: $sex, ')
+          ..write('officerNumber: $officerNumber, ')
+          ..write('rank: $rank')
           ..write(')'))
         .toString();
   }
@@ -971,6 +1048,8 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
     departmentId,
     position,
     sex,
+    officerNumber,
+    rank,
   );
   @override
   bool operator ==(Object other) =>
@@ -985,7 +1064,9 @@ class MemberTableData extends DataClass implements Insertable<MemberTableData> {
           other.dateOfBirth == this.dateOfBirth &&
           other.departmentId == this.departmentId &&
           other.position == this.position &&
-          other.sex == this.sex);
+          other.sex == this.sex &&
+          other.officerNumber == this.officerNumber &&
+          other.rank == this.rank);
 }
 
 class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
@@ -999,6 +1080,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
   final Value<String> departmentId;
   final Value<String> position;
   final Value<String> sex;
+  final Value<String> officerNumber;
+  final Value<String> rank;
   final Value<int> rowid;
   const MemberTableCompanion({
     this.id = const Value.absent(),
@@ -1011,6 +1094,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     this.departmentId = const Value.absent(),
     this.position = const Value.absent(),
     this.sex = const Value.absent(),
+    this.officerNumber = const Value.absent(),
+    this.rank = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   MemberTableCompanion.insert({
@@ -1024,6 +1109,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     required String departmentId,
     required String position,
     required String sex,
+    this.officerNumber = const Value.absent(),
+    this.rank = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -1046,6 +1133,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     Expression<String>? departmentId,
     Expression<String>? position,
     Expression<String>? sex,
+    Expression<String>? officerNumber,
+    Expression<String>? rank,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1059,6 +1148,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
       if (departmentId != null) 'department_id': departmentId,
       if (position != null) 'position': position,
       if (sex != null) 'sex': sex,
+      if (officerNumber != null) 'officer_number': officerNumber,
+      if (rank != null) 'rank': rank,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1074,6 +1165,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     Value<String>? departmentId,
     Value<String>? position,
     Value<String>? sex,
+    Value<String>? officerNumber,
+    Value<String>? rank,
     Value<int>? rowid,
   }) {
     return MemberTableCompanion(
@@ -1087,6 +1180,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
       departmentId: departmentId ?? this.departmentId,
       position: position ?? this.position,
       sex: sex ?? this.sex,
+      officerNumber: officerNumber ?? this.officerNumber,
+      rank: rank ?? this.rank,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1124,6 +1219,12 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
     if (sex.present) {
       map['sex'] = Variable<String>(sex.value);
     }
+    if (officerNumber.present) {
+      map['officer_number'] = Variable<String>(officerNumber.value);
+    }
+    if (rank.present) {
+      map['rank'] = Variable<String>(rank.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1143,6 +1244,8 @@ class MemberTableCompanion extends UpdateCompanion<MemberTableData> {
           ..write('departmentId: $departmentId, ')
           ..write('position: $position, ')
           ..write('sex: $sex, ')
+          ..write('officerNumber: $officerNumber, ')
+          ..write('rank: $rank, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1190,11 +1293,12 @@ class $AdminTableTable extends AdminTable
     aliasedName,
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 10,
+      minTextLength: 0,
       maxTextLength: 15,
     ),
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
   );
   static const VerificationMeta _passwordMeta = const VerificationMeta(
     'password',
@@ -1221,7 +1325,7 @@ class $AdminTableTable extends AdminTable
     false,
     additionalChecks: GeneratedColumn.checkTextLength(
       minTextLength: 5,
-      maxTextLength: 20,
+      maxTextLength: 255,
     ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
@@ -1239,7 +1343,34 @@ class $AdminTableTable extends AdminTable
       maxTextLength: 255,
     ),
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('ACTIVE'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -1249,6 +1380,8 @@ class $AdminTableTable extends AdminTable
     password,
     indentityNumber,
     imageUrl,
+    status,
+    createdAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1283,8 +1416,6 @@ class $AdminTableTable extends AdminTable
           _phoneNumberMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_phoneNumberMeta);
     }
     if (data.containsKey('password')) {
       context.handle(
@@ -1310,8 +1441,18 @@ class $AdminTableTable extends AdminTable
         _imageUrlMeta,
         imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
       );
-    } else if (isInserting) {
-      context.missing(_imageUrlMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
     }
     return context;
   }
@@ -1346,6 +1487,14 @@ class $AdminTableTable extends AdminTable
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
       )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
     );
   }
 
@@ -1362,6 +1511,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
   final String password;
   final String indentityNumber;
   final String imageUrl;
+  final String status;
+  final DateTime createdAt;
   const AdminTableData({
     required this.id,
     required this.name,
@@ -1369,6 +1520,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
     required this.password,
     required this.indentityNumber,
     required this.imageUrl,
+    required this.status,
+    required this.createdAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1379,6 +1532,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
     map['password'] = Variable<String>(password);
     map['indentity_number'] = Variable<String>(indentityNumber);
     map['image_url'] = Variable<String>(imageUrl);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
@@ -1390,6 +1545,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
       password: Value(password),
       indentityNumber: Value(indentityNumber),
       imageUrl: Value(imageUrl),
+      status: Value(status),
+      createdAt: Value(createdAt),
     );
   }
 
@@ -1405,6 +1562,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
       password: serializer.fromJson<String>(json['password']),
       indentityNumber: serializer.fromJson<String>(json['indentityNumber']),
       imageUrl: serializer.fromJson<String>(json['imageUrl']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
@@ -1417,6 +1576,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
       'password': serializer.toJson<String>(password),
       'indentityNumber': serializer.toJson<String>(indentityNumber),
       'imageUrl': serializer.toJson<String>(imageUrl),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -1427,6 +1588,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
     String? password,
     String? indentityNumber,
     String? imageUrl,
+    String? status,
+    DateTime? createdAt,
   }) => AdminTableData(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1434,6 +1597,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
     password: password ?? this.password,
     indentityNumber: indentityNumber ?? this.indentityNumber,
     imageUrl: imageUrl ?? this.imageUrl,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
   );
   AdminTableData copyWithCompanion(AdminTableCompanion data) {
     return AdminTableData(
@@ -1447,6 +1612,8 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
           ? data.indentityNumber.value
           : this.indentityNumber,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -1458,14 +1625,24 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
           ..write('phoneNumber: $phoneNumber, ')
           ..write('password: $password, ')
           ..write('indentityNumber: $indentityNumber, ')
-          ..write('imageUrl: $imageUrl')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, phoneNumber, password, indentityNumber, imageUrl);
+  int get hashCode => Object.hash(
+    id,
+    name,
+    phoneNumber,
+    password,
+    indentityNumber,
+    imageUrl,
+    status,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1475,7 +1652,9 @@ class AdminTableData extends DataClass implements Insertable<AdminTableData> {
           other.phoneNumber == this.phoneNumber &&
           other.password == this.password &&
           other.indentityNumber == this.indentityNumber &&
-          other.imageUrl == this.imageUrl);
+          other.imageUrl == this.imageUrl &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt);
 }
 
 class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
@@ -1485,6 +1664,8 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
   final Value<String> password;
   final Value<String> indentityNumber;
   final Value<String> imageUrl;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
   final Value<int> rowid;
   const AdminTableCompanion({
     this.id = const Value.absent(),
@@ -1493,22 +1674,24 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
     this.password = const Value.absent(),
     this.indentityNumber = const Value.absent(),
     this.imageUrl = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AdminTableCompanion.insert({
     required String id,
     required String name,
-    required String phoneNumber,
+    this.phoneNumber = const Value.absent(),
     required String password,
     required String indentityNumber,
-    required String imageUrl,
+    this.imageUrl = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
-       phoneNumber = Value(phoneNumber),
        password = Value(password),
-       indentityNumber = Value(indentityNumber),
-       imageUrl = Value(imageUrl);
+       indentityNumber = Value(indentityNumber);
   static Insertable<AdminTableData> custom({
     Expression<String>? id,
     Expression<String>? name,
@@ -1516,6 +1699,8 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
     Expression<String>? password,
     Expression<String>? indentityNumber,
     Expression<String>? imageUrl,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1525,6 +1710,8 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
       if (password != null) 'password': password,
       if (indentityNumber != null) 'indentity_number': indentityNumber,
       if (imageUrl != null) 'image_url': imageUrl,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1536,6 +1723,8 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
     Value<String>? password,
     Value<String>? indentityNumber,
     Value<String>? imageUrl,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
     return AdminTableCompanion(
@@ -1545,6 +1734,8 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
       password: password ?? this.password,
       indentityNumber: indentityNumber ?? this.indentityNumber,
       imageUrl: imageUrl ?? this.imageUrl,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1570,6 +1761,12 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
     if (imageUrl.present) {
       map['image_url'] = Variable<String>(imageUrl.value);
     }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1585,6 +1782,8 @@ class AdminTableCompanion extends UpdateCompanion<AdminTableData> {
           ..write('password: $password, ')
           ..write('indentityNumber: $indentityNumber, ')
           ..write('imageUrl: $imageUrl, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2540,6 +2739,8 @@ typedef $$MemberTableTableCreateCompanionBuilder =
       required String departmentId,
       required String position,
       required String sex,
+      Value<String> officerNumber,
+      Value<String> rank,
       Value<int> rowid,
     });
 typedef $$MemberTableTableUpdateCompanionBuilder =
@@ -2554,6 +2755,8 @@ typedef $$MemberTableTableUpdateCompanionBuilder =
       Value<String> departmentId,
       Value<String> position,
       Value<String> sex,
+      Value<String> officerNumber,
+      Value<String> rank,
       Value<int> rowid,
     });
 
@@ -2613,6 +2816,16 @@ class $$MemberTableTableFilterComposer
 
   ColumnFilters<String> get sex => $composableBuilder(
     column: $table.sex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get officerNumber => $composableBuilder(
+    column: $table.officerNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get rank => $composableBuilder(
+    column: $table.rank,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2675,6 +2888,16 @@ class $$MemberTableTableOrderingComposer
     column: $table.sex,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get officerNumber => $composableBuilder(
+    column: $table.officerNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rank => $composableBuilder(
+    column: $table.rank,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MemberTableTableAnnotationComposer
@@ -2723,6 +2946,14 @@ class $$MemberTableTableAnnotationComposer
 
   GeneratedColumn<String> get sex =>
       $composableBuilder(column: $table.sex, builder: (column) => column);
+
+  GeneratedColumn<String> get officerNumber => $composableBuilder(
+    column: $table.officerNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get rank =>
+      $composableBuilder(column: $table.rank, builder: (column) => column);
 }
 
 class $$MemberTableTableTableManager
@@ -2766,6 +2997,8 @@ class $$MemberTableTableTableManager
                 Value<String> departmentId = const Value.absent(),
                 Value<String> position = const Value.absent(),
                 Value<String> sex = const Value.absent(),
+                Value<String> officerNumber = const Value.absent(),
+                Value<String> rank = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MemberTableCompanion(
                 id: id,
@@ -2778,6 +3011,8 @@ class $$MemberTableTableTableManager
                 departmentId: departmentId,
                 position: position,
                 sex: sex,
+                officerNumber: officerNumber,
+                rank: rank,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2792,6 +3027,8 @@ class $$MemberTableTableTableManager
                 required String departmentId,
                 required String position,
                 required String sex,
+                Value<String> officerNumber = const Value.absent(),
+                Value<String> rank = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => MemberTableCompanion.insert(
                 id: id,
@@ -2804,6 +3041,8 @@ class $$MemberTableTableTableManager
                 departmentId: departmentId,
                 position: position,
                 sex: sex,
+                officerNumber: officerNumber,
+                rank: rank,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2835,10 +3074,12 @@ typedef $$AdminTableTableCreateCompanionBuilder =
     AdminTableCompanion Function({
       required String id,
       required String name,
-      required String phoneNumber,
+      Value<String> phoneNumber,
       required String password,
       required String indentityNumber,
-      required String imageUrl,
+      Value<String> imageUrl,
+      Value<String> status,
+      Value<DateTime> createdAt,
       Value<int> rowid,
     });
 typedef $$AdminTableTableUpdateCompanionBuilder =
@@ -2849,6 +3090,8 @@ typedef $$AdminTableTableUpdateCompanionBuilder =
       Value<String> password,
       Value<String> indentityNumber,
       Value<String> imageUrl,
+      Value<String> status,
+      Value<DateTime> createdAt,
       Value<int> rowid,
     });
 
@@ -2888,6 +3131,16 @@ class $$AdminTableTableFilterComposer
 
   ColumnFilters<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2930,6 +3183,16 @@ class $$AdminTableTableOrderingComposer
     column: $table.imageUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AdminTableTableAnnotationComposer
@@ -2962,6 +3225,12 @@ class $$AdminTableTableAnnotationComposer
 
   GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
 class $$AdminTableTableTableManager
@@ -3001,6 +3270,8 @@ class $$AdminTableTableTableManager
                 Value<String> password = const Value.absent(),
                 Value<String> indentityNumber = const Value.absent(),
                 Value<String> imageUrl = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AdminTableCompanion(
                 id: id,
@@ -3009,16 +3280,20 @@ class $$AdminTableTableTableManager
                 password: password,
                 indentityNumber: indentityNumber,
                 imageUrl: imageUrl,
+                status: status,
+                createdAt: createdAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String id,
                 required String name,
-                required String phoneNumber,
+                Value<String> phoneNumber = const Value.absent(),
                 required String password,
                 required String indentityNumber,
-                required String imageUrl,
+                Value<String> imageUrl = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AdminTableCompanion.insert(
                 id: id,
@@ -3027,6 +3302,8 @@ class $$AdminTableTableTableManager
                 password: password,
                 indentityNumber: indentityNumber,
                 imageUrl: imageUrl,
+                status: status,
+                createdAt: createdAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -21,6 +21,12 @@ class MemberTable extends Table{
 
   TextColumn get sex => text().withLength(min: 0, max: 10)();
 
+  // Số hiệu sĩ quan
+  TextColumn get officerNumber => text().withLength(min: 0, max: 50).withDefault(const Constant(''))();
+
+  // Cấp bậc
+  TextColumn get rank => text().withLength(min: 0, max: 50).withDefault(const Constant(''))();
+
   @override
   Set<Column> get primaryKey => {id};
 }

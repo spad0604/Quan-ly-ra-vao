@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:quanly/presentation/personal/personal_binding.dart';
 import 'package:quanly/presentation/personal/personal_view.dart';
+import 'package:quanly/presentation/auth/login_binding.dart';
+import 'package:quanly/presentation/auth/login_view.dart';
 
 import '../../presentation/home/home_binding.dart';
 import '../../presentation/home/home_view.dart';
@@ -10,6 +12,11 @@ class AppPages {
   AppPages._();
 
   static final routes = [
+    GetPage(
+      name: AppRoutes.LOGIN,
+      page: () => const LoginView(),
+      binding: LoginBinding(),
+    ),
     GetPage(
       name: AppRoutes.HOME,
       page: () => const HomeView(),
