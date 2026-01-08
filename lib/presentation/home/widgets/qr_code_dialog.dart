@@ -143,7 +143,7 @@ class _QRCodeDialogState extends State<QRCodeDialog> {
               child: QrImageView(
                 data: qrData,
                 version: QrVersions.auto,
-                size: 200.0,
+                size: 133.0,
                 backgroundColor: Colors.white,
               ),
             ),

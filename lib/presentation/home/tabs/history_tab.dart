@@ -57,13 +57,15 @@ class HistoryTab extends GetView<HistoryController> {
                             border: Border.all(color: Colors.grey.shade300),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: TextField(
                             controller: controller.searchController,
                             decoration: InputDecoration(
                               hintText: 'history_search_placeholder'.tr,
                               border: InputBorder.none,
-                              icon: const Icon(Icons.search, size: 18),
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                              prefixIcon: const Icon(Icons.search, size: 18),
                             ),
                             onChanged: (_) {
                               // Triggered by searchController listener with debounce
@@ -102,12 +104,17 @@ class HistoryTab extends GetView<HistoryController> {
                                   children: [
                                     const Text(
                                       'Từ ngày',
-                                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey,
+                                      ),
                                     ),
-                                    Obx(() => Text(
-                                      controller.formattedStartDate,
-                                      style: const TextStyle(fontSize: 12),
-                                    )),
+                                    Obx(
+                                      () => Text(
+                                        controller.formattedStartDate,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 const Icon(Icons.calendar_today, size: 16),
@@ -149,12 +156,17 @@ class HistoryTab extends GetView<HistoryController> {
                                   children: [
                                     const Text(
                                       'Đến ngày',
-                                      style: TextStyle(fontSize: 10, color: Colors.grey),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey,
+                                      ),
                                     ),
-                                    Obx(() => Text(
-                                      controller.formattedEndDate,
-                                      style: const TextStyle(fontSize: 12),
-                                    )),
+                                    Obx(
+                                      () => Text(
+                                        controller.formattedEndDate,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 const Icon(Icons.calendar_today, size: 16),
@@ -165,66 +177,61 @@ class HistoryTab extends GetView<HistoryController> {
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: InkWell(
-                          onTap: () {
-                            Get.bottomSheet(
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Obx(() => ListTile(
-                                      title: Text('history_all_status'.tr),
-                                      onTap: () {
-                                        controller.selectStatus(0);
-                                        Get.back();
-                                      },
-                                      trailing: controller.selectedStatus.value == 0
-                                          ? const Icon(Icons.check, color: AppColors.blueDark)
-                                          : null,
-                                    )),
-                                    Obx(() => ListTile(
-                                      title: Text('history_in_building'.tr),
-                                      onTap: () {
-                                        controller.selectStatus(1);
-                                        Get.back();
-                                      },
-                                      trailing: controller.selectedStatus.value == 1
-                                          ? const Icon(Icons.check, color: AppColors.blueDark)
-                                          : null,
-                                    )),
-                                    Obx(() => ListTile(
-                                      title: Text('history_left'.tr),
-                                      onTap: () {
-                                        controller.selectStatus(2);
-                                        Get.back();
-                                      },
-                                      trailing: controller.selectedStatus.value == 2
-                                          ? const Icon(Icons.check, color: AppColors.blueDark)
-                                          : null,
-                                    )),
-                                  ],
-                                ),
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          alignment: Alignment.centerLeft,
+                          child: Obx(
+                            () => DropdownButtonHideUnderline(
+                              child: DropdownButton<int>(
+                                value: controller.selectedStatus.value,
+                                isExpanded: true,
+                                icon: const Icon(Icons.keyboard_arrow_down),
+                                selectedItemBuilder: (context) {
+                                  return [
+                                    Text(
+                                      'history_all_status'.tr,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: TextStyle(fontWeight: FontWeight.w400),
+                                    ),
+                                    Text(
+                                      'history_in_building'.tr,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: TextStyle(fontWeight: FontWeight.w400),
+                                    ),
+                                    Text(
+                                      'history_left'.tr,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                      style: TextStyle(fontWeight: FontWeight.w400),
+                                    ),
+                                  ];
+                                },
+                                items: [
+                                  DropdownMenuItem(
+                                    value: 0,
+                                    child: Text('history_all_status'.tr, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w400)),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 1,
+                                    child: Text('history_in_building'.tr, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w400)),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 2,
+                                    child: Text('history_left'.tr, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w400)),
+                                  ),
+                                ],
+                                onChanged: (value) {
+                                  if (value == null) return;
+                                  controller.selectStatus(value);
+                                },
                               ),
-                            );
-                          },
-                          child: Container(
-                            height: 40,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Obx(() => Text(controller.statusText)),
-                                const Icon(Icons.keyboard_arrow_down),
-                              ],
                             ),
                           ),
                         ),
@@ -239,22 +246,30 @@ class HistoryTab extends GetView<HistoryController> {
                             color: AppColors.blueDark,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
-                            Icons.refresh,
-                            color: Colors.white,
-                          ),
+                          child: const Icon(Icons.refresh, color: Colors.white),
                         ),
                       ),
                       const SizedBox(width: 16),
                       OutlinedButton.icon(
                         onPressed: () => controller.exportHistoryToExcel(),
-                        icon: const Icon(Icons.download, size: 16, color: AppColors.blueDark),
-                        label: const Text('Xuất Excel', style: TextStyle(fontWeight: FontWeight.w500, color: AppColors.blueDark)),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
+                        icon: const Icon(
+                          Icons.download,
+                          size: 16,
+                          color: AppColors.blueDark,
+                        ),
+                        label: const Text(
+                          'Xuất Excel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
                             color: AppColors.blueDark,
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppColors.blueDark),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ],
@@ -359,11 +374,22 @@ class HistoryTab extends GetView<HistoryController> {
                   }),
 
                   const SizedBox(height: 24),
-                  // Pagination placeholder
+                  // Pagination
                   Obx(() {
-                    final total = controller.historyList.length;
-                    final start = total > 0 ? 1 : 0;
-                    final end = total;
+                    final total = controller.totalCount.value;
+                    final totalPages = controller.totalPages;
+                    final start = total > 0
+                        ? (controller.currentPage.value - 1) *
+                                  controller.pageSize +
+                              1
+                        : 0;
+                    final end = total > 0
+                        ? (start + controller.historyList.length - 1).clamp(
+                            0,
+                            total,
+                          )
+                        : 0;
+
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -379,39 +405,99 @@ class HistoryTab extends GetView<HistoryController> {
                         ),
                         Row(
                           children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
+                            InkWell(
+                              onTap: controller.currentPage.value > 1
+                                  ? () => controller.previousPage()
+                                  : null,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: controller.currentPage.value > 1
+                                        ? Colors.grey.shade300
+                                        : Colors.grey.shade200,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                  color: controller.currentPage.value > 1
+                                      ? Colors.white
+                                      : Colors.grey.shade100,
+                                ),
+                                child: Text(
+                                  'Trước',
+                                  style: TextStyle(
+                                    color: controller.currentPage.value > 1
+                                        ? Colors.black87
+                                        : Colors.grey.shade400,
+                                  ),
+                                ),
                               ),
-                              child: const Icon(Icons.chevron_left, size: 16),
                             ),
-                            Container(
-                              width: 30,
-                              height: 30,
-                              color: AppColors.blueDark,
-                              alignment: Alignment.center,
-                              child: const Text(
-                                '1',
-                                style: TextStyle(color: Colors.white),
+                            const SizedBox(width: 8),
+                            ...List.generate(totalPages.clamp(0, 5), (index) {
+                              final pageNum = index + 1;
+                              final isCurrent =
+                                  controller.currentPage.value == pageNum;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: InkWell(
+                                  onTap: () => controller.goToPage(pageNum),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: isCurrent
+                                          ? AppColors.blueDark
+                                          : Colors.white,
+                                      border: Border.all(
+                                        color: isCurrent
+                                            ? AppColors.blueDark
+                                            : Colors.grey.shade300,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      '$pageNum',
+                                      style: TextStyle(
+                                        color: isCurrent
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                            InkWell(
+                              onTap: controller.currentPage.value < totalPages
+                                  ? () => controller.nextPage()
+                                  : null,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color:
+                                        controller.currentPage.value <
+                                            totalPages
+                                        ? Colors.grey.shade300
+                                        : Colors.grey.shade200,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                  color:
+                                      controller.currentPage.value < totalPages
+                                      ? Colors.white
+                                      : Colors.grey.shade100,
+                                ),
+                                child: Text(
+                                  'Sau',
+                                  style: TextStyle(
+                                    color:
+                                        controller.currentPage.value <
+                                            totalPages
+                                        ? Colors.black87
+                                        : Colors.grey.shade400,
+                                  ),
+                                ),
                               ),
-                            ),
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: const Center(child: Text('2')),
-                            ),
-                            Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: const Icon(Icons.chevron_right, size: 16),
                             ),
                           ],
                         ),

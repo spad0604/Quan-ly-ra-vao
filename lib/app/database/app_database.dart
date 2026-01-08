@@ -131,7 +131,7 @@ class AppDatabase extends _$AppDatabase {
         readsFrom: {adminTable},
       ).getSingleOrNull();
       
-      final hash = _authenticationService.hashPassword('admin');
+      final hash = _authenticationService.hashPassword('ducthang123@');
       print('Default admin password hash: $hash');
       print('Default admin password hash length: ${hash.length}');
       
@@ -243,17 +243,43 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
-  Future<int> getTodayEntryCount() async {
+  Future<int> getTodayEntryCount({String? role}) async {
     try {
       final today = DateTime.now();
-      final list =
-          await (select(timeManagementTable)..where(
-                (tbl) =>
-                    tbl.checkInTime.year.equals(today.year) &
-                    tbl.checkInTime.month.equals(today.month) &
-                    tbl.checkInTime.day.equals(today.day),
-              ))
-              .get();
+      final query = select(timeManagementTable)
+        ..where(
+          (tbl) =>
+              tbl.checkInTime.year.equals(today.year) &
+              tbl.checkInTime.month.equals(today.month) &
+              tbl.checkInTime.day.equals(today.day),
+        );
+
+      if (role != null && role.isNotEmpty) {
+        query.where((tbl) => tbl.role.equals(role));
+      }
+
+      final list = await query.get();
+      return list.length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Counts today's guest *check-ins* (role = anonymus, status = ENTRY).
+  /// Used by dashboard card "Khách vãng lai hôm nay".
+  Future<int> getTodayGuestEntryCount() async {
+    try {
+      final today = DateTime.now();
+      final list = await (select(timeManagementTable)
+            ..where(
+              (tbl) =>
+                  tbl.role.equals(Role.anonymus.value) &
+                  tbl.status.equals(Status.entry.value) &
+                  tbl.checkInTime.year.equals(today.year) &
+                  tbl.checkInTime.month.equals(today.month) &
+                  tbl.checkInTime.day.equals(today.day),
+            ))
+          .get();
       return list.length;
     } catch (e) {
       return 0;
@@ -305,6 +331,97 @@ class AppDatabase extends _$AppDatabase {
       return list;
     } catch (e) {
       return [];
+    }
+  }
+
+  Future<List<TimeManagementTableData>> searchTimeManagement({
+    required int page,
+    required int pageSize,
+    required String role,
+    DateTime? start,
+    DateTime? end,
+    bool? isInBuilding,
+    List<String>? memberIds,
+    bool sortDescByCheckInTime = true,
+  }) async {
+    try {
+      if (memberIds != null && memberIds.isEmpty) {
+        return [];
+      }
+
+      final query = select(timeManagementTable)
+        ..where((t) => t.role.equals(role));
+
+      if (start != null && end != null) {
+        query.where((t) => t.checkInTime.isBetweenValues(start, end));
+      }
+
+      if (isInBuilding != null) {
+        if (isInBuilding) {
+          query.where((t) => t.checkOutTime.isNull());
+        } else {
+          query.where((t) => t.checkOutTime.isNotNull());
+        }
+      }
+
+      if (memberIds != null) {
+        query.where((t) => t.memberId.isIn(memberIds));
+      }
+
+      query
+        ..orderBy([
+          (t) => OrderingTerm(
+                expression: t.checkInTime,
+                mode: sortDescByCheckInTime ? OrderingMode.desc : OrderingMode.asc,
+              ),
+        ])
+        ..limit(pageSize, offset: (page - 1) * pageSize);
+
+      return await query.get();
+    } catch (e) {
+      print('Error in searchTimeManagement: $e');
+      return [];
+    }
+  }
+
+  Future<int> getTotalTimeManagementCount({
+    required String role,
+    DateTime? start,
+    DateTime? end,
+    bool? isInBuilding,
+    List<String>? memberIds,
+  }) async {
+    try {
+      if (memberIds != null && memberIds.isEmpty) {
+        return 0;
+      }
+
+      final countExp = timeManagementTable.id.count();
+      final query = selectOnly(timeManagementTable)..addColumns([countExp]);
+
+      query.where(timeManagementTable.role.equals(role));
+
+      if (start != null && end != null) {
+        query.where(timeManagementTable.checkInTime.isBetweenValues(start, end));
+      }
+
+      if (isInBuilding != null) {
+        if (isInBuilding) {
+          query.where(timeManagementTable.checkOutTime.isNull());
+        } else {
+          query.where(timeManagementTable.checkOutTime.isNotNull());
+        }
+      }
+
+      if (memberIds != null) {
+        query.where(timeManagementTable.memberId.isIn(memberIds));
+      }
+
+      final row = await query.getSingle();
+      return row.read(countExp) ?? 0;
+    } catch (e) {
+      print('Error in getTotalTimeManagementCount: $e');
+      return 0;
     }
   }
 
@@ -392,6 +509,82 @@ class AppDatabase extends _$AppDatabase {
       return result;
     } catch (e) {
       print('Error getting traffic previous 7 days: $e');
+      return [];
+    }
+  }
+
+  /// Get traffic data for last 30 days (count entries per day)
+  /// Returns a list of maps: [{date: DateTime, count: int}, ...]
+  Future<List<Map<String, dynamic>>> getTrafficLast30Days() async {
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final thirtyDaysAgo = today.subtract(const Duration(days: 29));
+
+      final allEntries = await select(timeManagementTable).get();
+
+      final Map<DateTime, int> dayCounts = {};
+      for (var entry in allEntries) {
+        final entryDay = DateTime(
+          entry.checkInTime.year,
+          entry.checkInTime.month,
+          entry.checkInTime.day,
+        );
+        if (!entryDay.isBefore(thirtyDaysAgo) && !entryDay.isAfter(today)) {
+          dayCounts[entryDay] = (dayCounts[entryDay] ?? 0) + 1;
+        }
+      }
+
+      final result = <Map<String, dynamic>>[];
+      for (int i = 0; i < 30; i++) {
+        final date = thirtyDaysAgo.add(Duration(days: i));
+        result.add({
+          'date': date,
+          'count': dayCounts[date] ?? 0,
+        });
+      }
+
+      return result;
+    } catch (e) {
+      print('Error getting traffic last 30 days: $e');
+      return [];
+    }
+  }
+
+  /// Get traffic data for previous 30 days (for comparison)
+  Future<List<Map<String, dynamic>>> getTrafficPrevious30Days() async {
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final thirtyDaysAgo = today.subtract(const Duration(days: 29));
+      final sixtyDaysAgo = thirtyDaysAgo.subtract(const Duration(days: 30));
+
+      final allEntries = await select(timeManagementTable).get();
+
+      final Map<DateTime, int> dayCounts = {};
+      for (var entry in allEntries) {
+        final entryDay = DateTime(
+          entry.checkInTime.year,
+          entry.checkInTime.month,
+          entry.checkInTime.day,
+        );
+        if (!entryDay.isBefore(sixtyDaysAgo) && entryDay.isBefore(thirtyDaysAgo)) {
+          dayCounts[entryDay] = (dayCounts[entryDay] ?? 0) + 1;
+        }
+      }
+
+      final result = <Map<String, dynamic>>[];
+      for (int i = 0; i < 30; i++) {
+        final date = sixtyDaysAgo.add(Duration(days: i));
+        result.add({
+          'date': date,
+          'count': dayCounts[date] ?? 0,
+        });
+      }
+
+      return result;
+    } catch (e) {
+      print('Error getting traffic previous 30 days: $e');
       return [];
     }
   }

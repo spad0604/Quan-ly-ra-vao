@@ -148,7 +148,7 @@ class _QrDataDialogState extends State<QrDataDialog> {
               child: QrImageView(
                 data: widget.qrData,
                 version: QrVersions.auto,
-                size: 200,
+                size: 133,
                 backgroundColor: Colors.white,
               ),
             ),

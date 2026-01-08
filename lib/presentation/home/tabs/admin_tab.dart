@@ -5,6 +5,41 @@ class AdminTab extends GetView<AdminController> {
 
   @override
   Widget build(BuildContext context) {
+    // If the current admin is not the default 'admin', hide create/list UI and show a notice.
+    if (!controller.canManageAdmins) {
+      return Column(
+        children: [
+          HomeHeader(
+            title: 'Quản lý tài khoản Admin',
+            subtitle: 'Tạo và quản lý các account admin trong hệ thống',
+          ),
+          Expanded(
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Text(
+                  'Bạn không có quyền quản lý Admin.',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       children: [
         HomeHeader(

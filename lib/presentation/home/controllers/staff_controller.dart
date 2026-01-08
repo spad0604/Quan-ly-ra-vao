@@ -234,7 +234,7 @@ class StaffController extends BaseController {
     Get.dialog(EditMemberPopup(member: member), barrierDismissible: true);
   }
 
-  Future<void> updateMember(
+  Future<bool> updateMember(
     String memberId,
     String name,
     String identityNumber,
@@ -265,12 +265,13 @@ class StaffController extends BaseController {
 
       await _db.updateMember(memberId, member);
       showSuccess('Cập nhật cán bộ thành công!');
-      Get.back(); // Close edit popup
       getMembers(); // Refresh member list
       // Refresh dashboard and history
       _refreshOtherControllers();
+      return true;
     } catch (e) {
       showError('Lỗi khi cập nhật cán bộ: $e');
+      return false;
     }
   }
 
@@ -346,7 +347,49 @@ class StaffController extends BaseController {
       hideLoading();
 
       if (filePath != null) {
-        showSuccess('Xuất Excel thành công!\nFile: $filePath');
+        final fileName = filePath.split(RegExp(r'[\\\\/]')).last;
+        Get.showSnackbar(
+          GetSnackBar(
+            titleText: const Text('Xuất Excel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            messageText: Text('Đã xuất: $fileName', style: const TextStyle(color: Colors.white)),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.black87,
+            margin: EdgeInsets.only(
+              right: 16,
+              bottom: 16,
+              left: Get.width * 0.55,
+            ),
+            borderRadius: 10,
+            duration: const Duration(seconds: 6),
+            mainButton: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () async {
+                    final ok = await _excelExportService.openFile(filePath);
+                    if (!ok) {
+                      await _excelExportService.revealInFolder(filePath);
+                    }
+                  },
+                  child: const Text(
+                    'Mở file',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () async {
+                    await _excelExportService.revealInFolder(filePath);
+                  },
+                  child: const Text(
+                    'Mở thư mục',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       } else {
         showError('Lỗi khi xuất Excel');
       }

@@ -31,6 +31,15 @@ class DashboardController extends GetxController {
   final totalTraffic = 0.obs;
   final trafficData = <Map<String, dynamic>>[].obs;
 
+  // Traffic range: 'week' or 'month'
+  final trafficRange = 'week'.obs;
+
+  void setTrafficRange(String range) {
+    if (range != 'week' && range != 'month') return;
+    trafficRange.value = range;
+    getTrafficData();
+  }
+
   RxList<TimeManagementTableData> recentEntrys = RxList<TimeManagementTableData>([]);
   RxList<StaffPresentItem> todayStaffPresent = RxList<StaffPresentItem>([]);
   
@@ -57,32 +66,54 @@ class DashboardController extends GetxController {
   
   Future<void> getTrafficData() async {
     try {
-      // Get traffic for last 7 days
-      final last7Days = await _db.getTrafficLast7Days();
-      trafficData.value = last7Days;
-      
-      // Calculate total traffic (sum of all entries in last 7 days)
-      totalTraffic.value = last7Days.fold<int>(
-        0,
-        (sum, day) => sum + (day['count'] as int),
-      );
-      
-      // Get traffic for previous 7 days for comparison
-      final previous7Days = await _db.getTrafficPrevious7Days();
-      final previousTotal = previous7Days.fold<int>(
-        0,
-        (sum, day) => sum + (day['count'] as int),
-      );
-      
-      // Calculate growth percentage
-      if (previousTotal > 0) {
-        final growth = ((totalTraffic.value - previousTotal) / previousTotal * 100).round();
+      if (trafficRange.value == 'week') {
+        // Get traffic for last 7 days
+        final last7Days = await _db.getTrafficLast7Days();
+        trafficData.value = last7Days;
+
+        // Calculate total traffic (sum of all entries in last 7 days)
+        totalTraffic.value = last7Days.fold<int>(
+          0,
+          (sum, day) => sum + (day['count'] as int),
+        );
+
+        // Get traffic for previous 7 days for comparison
+        final previous7Days = await _db.getTrafficPrevious7Days();
+        final previousTotal = previous7Days.fold<int>(
+          0,
+          (sum, day) => sum + (day['count'] as int),
+        );
+
+        // Calculate growth percentage
+        if (previousTotal > 0) {
+          final growth = ((totalTraffic.value - previousTotal) / previousTotal * 100).round();
+          trafficGrowth.value = growth;
+        } else if (totalTraffic.value > 0) {
+          trafficGrowth.value = 100;
+        } else {
+          trafficGrowth.value = 0;
+        }
+        return;
+      }
+
+      // Month view: last 30 days
+      final last30 = await _db.getTrafficLast30Days();
+      trafficData.value = last30;
+
+      totalTraffic.value = last30.fold<int>(0, (sum, day) => sum + (day['count'] as int));
+
+      final previous30 = await _db.getTrafficPrevious30Days();
+      final previousTotal30 = previous30.fold<int>(0, (sum, day) => sum + (day['count'] as int));
+
+      if (previousTotal30 > 0) {
+        final growth = ((totalTraffic.value - previousTotal30) / previousTotal30 * 100).round();
         trafficGrowth.value = growth;
       } else if (totalTraffic.value > 0) {
-        trafficGrowth.value = 100; // 100% growth if no previous data
+        trafficGrowth.value = 100;
       } else {
         trafficGrowth.value = 0;
       }
+      return;
     } catch (e) {
       print('Error getting traffic data: $e');
       trafficData.value = [];
@@ -100,7 +131,7 @@ class DashboardController extends GetxController {
   }
 
   Future<void> getTodayTotalEntry() async {
-    guestsToday.value = await _db.getTodayEntryCount();
+    guestsToday.value = await _db.getTodayGuestEntryCount();
   }
 
   Future<void> getRecentEntrys() async {

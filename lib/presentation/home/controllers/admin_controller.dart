@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:quanly/app/database/app_database.dart';
 import 'package:quanly/core/authentication/authentication_service.dart';
 import 'package:quanly/core/base/base_controller.dart';
+import 'package:quanly/core/services/auth_service.dart';
 
 class AdminUiItem {
   final String id;
@@ -78,6 +79,16 @@ class AdminController extends BaseController {
     return (tc / pageSize).ceil();
   }
 
+  bool get canManageAdmins {
+    try {
+      final authService = Get.find<AuthService>();
+      // Only the admin account with username 'admin' is allowed to manage admins
+      return authService.adminUsername == 'admin';
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> fetchAdmins({bool showLoading = true}) async {
     try {
       isTableLoading.value = true;
@@ -117,6 +128,11 @@ class AdminController extends BaseController {
   }
 
   Future<void> createAdmin() async {
+    if (!canManageAdmins) {
+      showError('Bạn không có quyền quản lý admin');
+      return;
+    }
+
     final name = fullNameController.text.trim();
     final username = usernameController.text.trim();
     final phone = phoneController.text.trim();
@@ -163,6 +179,11 @@ class AdminController extends BaseController {
   }
 
   Future<void> toggleStatus(AdminUiItem item) async {
+    if (!canManageAdmins) {
+      showError('Bạn không có quyền quản lý admin');
+      return;
+    }
+
     try {
       final next = item.status == 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
       await _db.updateAdminStatus(item.id, next);
@@ -173,6 +194,20 @@ class AdminController extends BaseController {
   }
 
   void showDeleteConfirmation(AdminUiItem admin) {
+    if (!canManageAdmins) {
+      showError('Bạn không có quyền quản lý admin');
+      return;
+    }
+
+    // Prevent self-deletion
+    try {
+      final currentAdminId = Get.find<AuthService>().currentAdmin?.id;
+      if (currentAdminId == admin.id) {
+        showError('Không thể xóa tài khoản admin đang đăng nhập');
+        return;
+      }
+    } catch (_) {}
+
     Get.dialog(
       AlertDialog(
         title: const Text('Xác nhận xóa'),
@@ -202,10 +237,19 @@ class AdminController extends BaseController {
       showLoading(message: 'Đang xoá...');
       await _db.deleteAdmin(adminId);
       hideLoading();
+      // Add small delay to ensure loading dialog closes
+      await Future.delayed(const Duration(milliseconds: 100));
       showSuccess('Đã xoá admin');
       await fetchAdmins(showLoading: false);
     } catch (e) {
       hideLoading();
+      // Force close any remaining dialogs
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (Get.isDialogOpen == true) {
+        try {
+          Get.back();
+        } catch (_) {}
+      }
       showError('Lỗi khi xoá admin: $e');
     }
   }

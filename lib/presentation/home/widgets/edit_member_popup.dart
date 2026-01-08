@@ -291,8 +291,8 @@ class _EditMemberPopupState extends State<EditMemberPopup> {
                   ),
                   const SizedBox(width: 12),
                   ElevatedButton(
-                    onPressed: () {
-                      staffController.updateMember(
+                    onPressed: () async {
+                      final ok = await staffController.updateMember(
                         widget.member.id,
                         nameController.text.trim(),
                         idController.text.trim(),
@@ -305,6 +305,35 @@ class _EditMemberPopupState extends State<EditMemberPopup> {
                         officerNumberController.text.trim(),
                         rankController.text.trim(),
                       );
+                      if (ok) {
+                        // Unfocus any focused field to release keyboard state, then close.
+                        try {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                        } catch (_) {}
+
+                        // Small delay to allow platform key events to settle
+                        await Future.delayed(const Duration(milliseconds: 60));
+
+                        // Try to close via Get first, then fallback to root navigator pop
+                        try {
+                          if (Get.isDialogOpen == true) {
+                            Get.back();
+                            return;
+                          }
+                        } catch (_) {}
+
+                        try {
+                          final navigator = Navigator.of(context, rootNavigator: true);
+                          if (navigator.canPop()) {
+                            navigator.pop();
+                          }
+                        } catch (_) {
+                          // As a last resort, call Get.back() again
+                          try {
+                            Get.back();
+                          } catch (_) {}
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.blueDark,

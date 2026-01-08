@@ -126,17 +126,31 @@ class DashboardTab extends GetView<DashboardController> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(
-                  '${'dashboard_this_week'.tr} ▾',
-                  style: const TextStyle(fontSize: 12),
+                child: Obx(
+                  () => DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: controller.trafficRange.value,
+                      items: [
+                        DropdownMenuItem(
+                          value: 'week',
+                          child: Text('${'dashboard_this_week'.tr}'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'month',
+                          child: Text('${'dashboard_this_month'.tr}'),
+                        ),
+                      ],
+                      onChanged: (v) {
+                        if (v != null) controller.setTrafficRange(v);
+                      },
+                      style: const TextStyle(fontSize: 12, color: Colors.black87),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -420,25 +434,8 @@ class DashboardTab extends GetView<DashboardController> {
                   fontSize: 16,
                 ),
               ),
-              Row(
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.filter_list, size: 16, color: AppColors.blueDark),
-                    label: Text('filter'.tr, style: TextStyle(color: AppColors.blueDark),),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.blueDark,
-                      foregroundColor: Colors.white,
-                    ),
-                    onPressed: () {},
-                    icon: const Icon(Icons.download, size: 16, color: Colors.white),
-                    label: Text('dashboard_export_report'.tr, style: TextStyle(fontSize: 12, color: Colors.white)),
-                  ),
-                ],
-              ),
+              // Removed inline filter/export buttons per UX request
+              const SizedBox.shrink(),
             ],
           ),
           const SizedBox(height: 16),

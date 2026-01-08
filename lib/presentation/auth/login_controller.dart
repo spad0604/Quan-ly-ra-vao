@@ -6,8 +6,8 @@ import 'package:quanly/app/routes/app_routes.dart';
 import 'package:quanly/core/services/auth_service.dart';
 
 class LoginController extends BaseController {
-  final usernameController = TextEditingController(text: 'admin');
-  final passwordController = TextEditingController(text: 'admin');
+  final usernameController = TextEditingController(text: '');
+  final passwordController = TextEditingController(text: '');
 
   final _db = AppDatabase.instance;
 
